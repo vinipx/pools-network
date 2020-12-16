@@ -1,0 +1,8 @@
+syntax = "proto3";
+package poolsnetwork.reports.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/reports/types";
+
+// GenesisState defines the reports module's genesis state.
+message GenesisState {
+}

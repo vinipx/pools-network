@@ -78,6 +78,12 @@ import (
 	poolsnetworkkeeper "github.com/bloxapp/pools-network/x/poolsnetwork/keeper"
 	poolsnetworktypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
+		"github.com/bloxapp/pools-network/x/reports"
+		reportskeeper "github.com/bloxapp/pools-network/x/reports/keeper"
+		reportstypes "github.com/bloxapp/pools-network/x/reports/types"
+		"github.com/bloxapp/pools-network/x/bridge"
+		bridgekeeper "github.com/bloxapp/pools-network/x/bridge/keeper"
+		bridgetypes "github.com/bloxapp/pools-network/x/bridge/types"
 )
 
 var (
@@ -109,6 +115,8 @@ var (
 		transfer.AppModuleBasic{},
 		poolsnetwork.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
+		reports.AppModuleBasic{},
+		bridge.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -169,6 +177,8 @@ type App struct {
 
 	poolsnetworkKeeper poolsnetworkkeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+		reportsKeeper reportskeeper.Keeper
+		bridgeKeeper bridgekeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -198,6 +208,8 @@ func New(
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
         poolsnetworktypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
+		reportstypes.StoreKey,
+		bridgetypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -301,6 +313,16 @@ func New(
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
+		app.reportsKeeper = *reportskeeper.NewKeeper(
+			appCodec,
+			keys[reportstypes.StoreKey],
+			keys[reportstypes.MemStoreKey],
+		)
+		app.bridgeKeeper = *bridgekeeper.NewKeeper(
+			appCodec,
+			keys[bridgetypes.StoreKey],
+			keys[bridgetypes.MemStoreKey],
+		)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
@@ -327,6 +349,8 @@ func New(
 		transferModule,
 		poolsnetwork.NewAppModule(appCodec, app.poolsnetworkKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
+		reports.NewAppModule(appCodec, app.reportsKeeper),
+		bridge.NewAppModule(appCodec, app.bridgeKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -360,6 +384,8 @@ func New(
 		evidencetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
+		reportstypes.ModuleName,
+		bridgetypes.ModuleName,
 	)
 
     app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -534,6 +560,8 @@ func initParamsKeeper(appCodec codec.BinaryMarshaler, legacyAmino *codec.LegacyA
     paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
+		paramsKeeper.Subspace(reportstypes.ModuleName)
+		paramsKeeper.Subspace(bridgetypes.ModuleName)
 
 	return paramsKeeper
 }

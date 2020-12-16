@@ -1,0 +1,8 @@
+syntax = "proto3";
+package poolsnetwork.bridge.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/bridge/types";
+
+// GenesisState defines the bridge module's genesis state.
+message GenesisState {
+}

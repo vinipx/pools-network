@@ -3,6 +3,7 @@ package poolsnetwork.poolsnetwork.v1beta1;
 
 import "cosmos/base/query/v1beta1/pagination.proto";
 // this line is used by starport scaffolding # 1
+import "poolsnetwork/v1beta/poolTest.proto";
 
 
 option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
@@ -10,6 +11,15 @@ option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
 // Query defines the gRPC querier service.
 service Query {
     // this line is used by starport scaffolding # 2
+	rpc AllPoolTest(QueryAllPoolTestRequest) returns (QueryAllPoolTestResponse);
 }
 
 // this line is used by starport scaffolding # 3
+message QueryAllPoolTestRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllPoolTestResponse {
+	repeated MsgPoolTest poolTest = 1;
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+package poolsnetwork.poolsnetwork.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
+
+import "gogoproto/gogo.proto";
+
+message MsgPoolTest {
+  string id = 1;
+  bytes creator = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string pool_id = 3; 
+  string pubKey = 4; 
+  bool slashed = 5; 
+  bool exited = 6; 
+  string ssvCommittee = 7; 
+}
+

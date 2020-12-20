@@ -7,7 +7,7 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/any.proto";
 
 message ValSetChange {
-  google.protobuf.Any address   = 1 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"]; // the operator's ethereum address
+  google.protobuf.Any address   = 1 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"]; // the operator's ethereum address
   uint64 new_power              = 2;
 }
 
@@ -18,7 +18,7 @@ message ETHBalanceChange {
 message Withdraw {
   bytes to                            = 1;
   uint64 amount                       = 2;
-  google.protobuf.Any coin_address    = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
+  google.protobuf.Any coin_address    = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
 }
 
 // nonce is the monotonic id of an update
@@ -35,5 +35,5 @@ message MsgBridgedUpdate {
 message MsgBridgedUpdateConfirm {
   uint64 nonce                          = 1;
   bytes signature                       = 2;
-  google.protobuf.Any ethereum_address  = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"]; // the operator's ethereum address
+  google.protobuf.Any ethereum_address  = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"]; // the operator's ethereum address
 }

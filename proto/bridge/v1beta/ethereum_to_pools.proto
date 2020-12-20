@@ -4,19 +4,18 @@ package bridge.v1beta1;
 option go_package = "github.com/bloxapp/pools-network/x/bridge/types";
 
 import "gogoproto/gogo.proto";
-import "google/protobuf/any.proto";
 
 message DelegateVote {
   uint64 nonce                      = 1;
-  google.protobuf.Any delegator     = 2 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
-  google.protobuf.Any to            = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
+  bytes delegator     = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  bytes to            = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
   uint64 power                      = 4;
 }
 
 message UnDelegateVote {
   uint64 nonce                      = 1;
-  google.protobuf.Any from          = 2 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
-  google.protobuf.Any delegator     = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
+  bytes from          = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  bytes delegator     = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
 }
 
 message CreatePool {
@@ -25,15 +24,15 @@ message CreatePool {
 
 message CreateValidator {
   uint64 nonce                          = 1;
-  google.protobuf.Any ethereum_address  = 2 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
-  google.protobuf.Any consensus_pubkey  = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  bytes ethereum_address  = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  bytes consensus_pubkey  = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
   uint64 eth_stake                      = 4; // in gwei
 }
 
 message UpdateValidator {
   uint64 nonce                              = 1;
-  google.protobuf.Any consensus_pubkey      = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
-  google.protobuf.Any new_ethereum_address  = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
+  bytes consensus_pubkey      = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  bytes new_ethereum_address  = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
   uint64 new_eth_stake                      = 4; // in gwei
   bool exit                                 = 5;
 }
@@ -45,8 +44,8 @@ message UpdateValidator {
 // Due to eth1 probabilistic finality, each validator on the pools network will need to attest to all claims to make them be included in the state (2/3 vote).
 message MsgEthereumClaim {
   uint64 ethereum_chain_id                    = 1;
-  google.protobuf.Any contract_address        = 2 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
-  google.protobuf.Any consensus_pubkey        = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  bytes contract_address        = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  bytes consensus_pubkey        = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
   repeated DelegateVote delegates             = 4;
   repeated UnDelegateVote undelegates         = 5;
   repeated CreatePool create_pools            = 6;

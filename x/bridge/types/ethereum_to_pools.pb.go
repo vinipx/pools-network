@@ -5,9 +5,8 @@ package types
 
 import (
 	fmt "fmt"
+	github_com_bloxapp_pools_network_shared_types "github.com/bloxapp/pools-network/shared/types"
 	_ "github.com/cosmos/cosmos-sdk/codec/types"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	github_com_ethereum_go_ethereum_common "github.com/ethereum/go-ethereum/common"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	io "io"
@@ -27,10 +26,10 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type DelegateVote struct {
-	Nonce     uint64                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	Delegator *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,2,opt,name=delegator,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"delegator,omitempty"`
-	To        *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,3,opt,name=to,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"to,omitempty"`
-	Power     uint64                                          `protobuf:"varint,4,opt,name=power,proto3" json:"power,omitempty"`
+	Nonce     uint64                                                         `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	Delegator *github_com_bloxapp_pools_network_shared_types.EthereumAddress `protobuf:"bytes,2,opt,name=delegator,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"delegator,omitempty"`
+	To        *github_com_bloxapp_pools_network_shared_types.EthereumAddress `protobuf:"bytes,3,opt,name=to,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"to,omitempty"`
+	Power     uint64                                                         `protobuf:"varint,4,opt,name=power,proto3" json:"power,omitempty"`
 }
 
 func (m *DelegateVote) Reset()         { *m = DelegateVote{} }
@@ -73,20 +72,6 @@ func (m *DelegateVote) GetNonce() uint64 {
 	return 0
 }
 
-func (m *DelegateVote) GetDelegator() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.Delegator
-	}
-	return nil
-}
-
-func (m *DelegateVote) GetTo() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.To
-	}
-	return nil
-}
-
 func (m *DelegateVote) GetPower() uint64 {
 	if m != nil {
 		return m.Power
@@ -95,9 +80,9 @@ func (m *DelegateVote) GetPower() uint64 {
 }
 
 type UnDelegateVote struct {
-	Nonce     uint64                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	From      *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,2,opt,name=from,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"from,omitempty"`
-	Delegator *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,3,opt,name=delegator,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"delegator,omitempty"`
+	Nonce     uint64                                                         `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	From      *github_com_bloxapp_pools_network_shared_types.EthereumAddress `protobuf:"bytes,2,opt,name=from,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"from,omitempty"`
+	Delegator *github_com_bloxapp_pools_network_shared_types.EthereumAddress `protobuf:"bytes,3,opt,name=delegator,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"delegator,omitempty"`
 }
 
 func (m *UnDelegateVote) Reset()         { *m = UnDelegateVote{} }
@@ -138,20 +123,6 @@ func (m *UnDelegateVote) GetNonce() uint64 {
 		return m.Nonce
 	}
 	return 0
-}
-
-func (m *UnDelegateVote) GetFrom() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.From
-	}
-	return nil
-}
-
-func (m *UnDelegateVote) GetDelegator() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.Delegator
-	}
-	return nil
 }
 
 type CreatePool struct {
@@ -199,10 +170,10 @@ func (m *CreatePool) GetNonce() uint64 {
 }
 
 type CreateValidator struct {
-	Nonce           uint64                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	EthereumAddress *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,2,opt,name=ethereum_address,json=ethereumAddress,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"ethereum_address,omitempty"`
-	ConsensusPubkey *github_com_cosmos_cosmos_sdk_types.AccAddress  `protobuf:"bytes,3,opt,name=consensus_pubkey,json=consensusPubkey,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"consensus_pubkey,omitempty"`
-	EthStake        uint64                                          `protobuf:"varint,4,opt,name=eth_stake,json=ethStake,proto3" json:"eth_stake,omitempty"`
+	Nonce           uint64                                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	EthereumAddress *github_com_bloxapp_pools_network_shared_types.EthereumAddress  `protobuf:"bytes,2,opt,name=ethereum_address,json=ethereumAddress,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"ethereum_address,omitempty"`
+	ConsensusPubkey *github_com_bloxapp_pools_network_shared_types.ConsensusAddress `protobuf:"bytes,3,opt,name=consensus_pubkey,json=consensusPubkey,proto3,customtype=github.com/bloxapp/pools-network/shared/types.ConsensusAddress" json:"consensus_pubkey,omitempty"`
+	EthStake        uint64                                                          `protobuf:"varint,4,opt,name=eth_stake,json=ethStake,proto3" json:"eth_stake,omitempty"`
 }
 
 func (m *CreateValidator) Reset()         { *m = CreateValidator{} }
@@ -245,20 +216,6 @@ func (m *CreateValidator) GetNonce() uint64 {
 	return 0
 }
 
-func (m *CreateValidator) GetEthereumAddress() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.EthereumAddress
-	}
-	return nil
-}
-
-func (m *CreateValidator) GetConsensusPubkey() *github_com_cosmos_cosmos_sdk_types.AccAddress {
-	if m != nil {
-		return m.ConsensusPubkey
-	}
-	return nil
-}
-
 func (m *CreateValidator) GetEthStake() uint64 {
 	if m != nil {
 		return m.EthStake
@@ -267,11 +224,11 @@ func (m *CreateValidator) GetEthStake() uint64 {
 }
 
 type UpdateValidator struct {
-	Nonce              uint64                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	ConsensusPubkey    *github_com_cosmos_cosmos_sdk_types.AccAddress  `protobuf:"bytes,2,opt,name=consensus_pubkey,json=consensusPubkey,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"consensus_pubkey,omitempty"`
-	NewEthereumAddress *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,3,opt,name=new_ethereum_address,json=newEthereumAddress,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"new_ethereum_address,omitempty"`
-	NewEthStake        uint64                                          `protobuf:"varint,4,opt,name=new_eth_stake,json=newEthStake,proto3" json:"new_eth_stake,omitempty"`
-	Exit               bool                                            `protobuf:"varint,5,opt,name=exit,proto3" json:"exit,omitempty"`
+	Nonce              uint64                                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	ConsensusPubkey    *github_com_bloxapp_pools_network_shared_types.ConsensusAddress `protobuf:"bytes,2,opt,name=consensus_pubkey,json=consensusPubkey,proto3,customtype=github.com/bloxapp/pools-network/shared/types.ConsensusAddress" json:"consensus_pubkey,omitempty"`
+	NewEthereumAddress *github_com_bloxapp_pools_network_shared_types.EthereumAddress  `protobuf:"bytes,3,opt,name=new_ethereum_address,json=newEthereumAddress,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"new_ethereum_address,omitempty"`
+	NewEthStake        uint64                                                          `protobuf:"varint,4,opt,name=new_eth_stake,json=newEthStake,proto3" json:"new_eth_stake,omitempty"`
+	Exit               bool                                                            `protobuf:"varint,5,opt,name=exit,proto3" json:"exit,omitempty"`
 }
 
 func (m *UpdateValidator) Reset()         { *m = UpdateValidator{} }
@@ -314,20 +271,6 @@ func (m *UpdateValidator) GetNonce() uint64 {
 	return 0
 }
 
-func (m *UpdateValidator) GetConsensusPubkey() *github_com_cosmos_cosmos_sdk_types.AccAddress {
-	if m != nil {
-		return m.ConsensusPubkey
-	}
-	return nil
-}
-
-func (m *UpdateValidator) GetNewEthereumAddress() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.NewEthereumAddress
-	}
-	return nil
-}
-
 func (m *UpdateValidator) GetNewEthStake() uint64 {
 	if m != nil {
 		return m.NewEthStake
@@ -347,14 +290,14 @@ func (m *UpdateValidator) GetExit() bool {
 // each event has nonce, a monotonic id of the claim
 // Due to eth1 probabilistic finality, each validator on the pools network will need to attest to all claims to make them be included in the state (2/3 vote).
 type MsgEthereumClaim struct {
-	EthereumChainId  uint64                                          `protobuf:"varint,1,opt,name=ethereum_chain_id,json=ethereumChainId,proto3" json:"ethereum_chain_id,omitempty"`
-	ContractAddress  *github_com_ethereum_go_ethereum_common.Address `protobuf:"bytes,2,opt,name=contract_address,json=contractAddress,proto3,casttype=github.com/ethereum/go-ethereum/common.Address" json:"contract_address,omitempty"`
-	ConsensusPubkey  *github_com_cosmos_cosmos_sdk_types.AccAddress  `protobuf:"bytes,3,opt,name=consensus_pubkey,json=consensusPubkey,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"consensus_pubkey,omitempty"`
-	Delegates        []*DelegateVote                                 `protobuf:"bytes,4,rep,name=delegates,proto3" json:"delegates,omitempty"`
-	Undelegates      []*UnDelegateVote                               `protobuf:"bytes,5,rep,name=undelegates,proto3" json:"undelegates,omitempty"`
-	CreatePools      []*CreatePool                                   `protobuf:"bytes,6,rep,name=create_pools,json=createPools,proto3" json:"create_pools,omitempty"`
-	CreateValidators []*CreateValidator                              `protobuf:"bytes,7,rep,name=create_validators,json=createValidators,proto3" json:"create_validators,omitempty"`
-	UpdateValidators []*UpdateValidator                              `protobuf:"bytes,8,rep,name=update_validators,json=updateValidators,proto3" json:"update_validators,omitempty"`
+	EthereumChainId  uint64                                                          `protobuf:"varint,1,opt,name=ethereum_chain_id,json=ethereumChainId,proto3" json:"ethereum_chain_id,omitempty"`
+	ContractAddress  *github_com_bloxapp_pools_network_shared_types.EthereumAddress  `protobuf:"bytes,2,opt,name=contract_address,json=contractAddress,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"contract_address,omitempty"`
+	ConsensusPubkey  *github_com_bloxapp_pools_network_shared_types.ConsensusAddress `protobuf:"bytes,3,opt,name=consensus_pubkey,json=consensusPubkey,proto3,customtype=github.com/bloxapp/pools-network/shared/types.ConsensusAddress" json:"consensus_pubkey,omitempty"`
+	Delegates        []*DelegateVote                                                 `protobuf:"bytes,4,rep,name=delegates,proto3" json:"delegates,omitempty"`
+	Undelegates      []*UnDelegateVote                                               `protobuf:"bytes,5,rep,name=undelegates,proto3" json:"undelegates,omitempty"`
+	CreatePools      []*CreatePool                                                   `protobuf:"bytes,6,rep,name=create_pools,json=createPools,proto3" json:"create_pools,omitempty"`
+	CreateValidators []*CreateValidator                                              `protobuf:"bytes,7,rep,name=create_validators,json=createValidators,proto3" json:"create_validators,omitempty"`
+	UpdateValidators []*UpdateValidator                                              `protobuf:"bytes,8,rep,name=update_validators,json=updateValidators,proto3" json:"update_validators,omitempty"`
 }
 
 func (m *MsgEthereumClaim) Reset()         { *m = MsgEthereumClaim{} }
@@ -395,20 +338,6 @@ func (m *MsgEthereumClaim) GetEthereumChainId() uint64 {
 		return m.EthereumChainId
 	}
 	return 0
-}
-
-func (m *MsgEthereumClaim) GetContractAddress() *github_com_ethereum_go_ethereum_common.Address {
-	if m != nil {
-		return m.ContractAddress
-	}
-	return nil
-}
-
-func (m *MsgEthereumClaim) GetConsensusPubkey() *github_com_cosmos_cosmos_sdk_types.AccAddress {
-	if m != nil {
-		return m.ConsensusPubkey
-	}
-	return nil
 }
 
 func (m *MsgEthereumClaim) GetDelegates() []*DelegateVote {
@@ -460,49 +389,47 @@ func init() {
 }
 
 var fileDescriptor_1fc670358116c6e3 = []byte{
-	// 658 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x55, 0xcd, 0x6a, 0xdb, 0x4e,
-	0x10, 0x8f, 0x1c, 0x3b, 0xff, 0x64, 0x9d, 0x7f, 0xe2, 0x2c, 0x3e, 0xa8, 0x69, 0x71, 0x8c, 0xa0,
-	0x60, 0x0a, 0x96, 0x48, 0x7a, 0x2b, 0x14, 0x9a, 0xa4, 0x3d, 0x04, 0x5a, 0x08, 0x2a, 0x09, 0xa5,
-	0x14, 0x8c, 0xb4, 0x9a, 0xc8, 0xc2, 0xd2, 0x8e, 0xd0, 0xae, 0xe2, 0xb8, 0xa7, 0x3e, 0x42, 0x5f,
-	0xa4, 0xef, 0xd1, 0x5b, 0x73, 0xec, 0x29, 0x94, 0xe4, 0xda, 0x27, 0x08, 0x3d, 0x14, 0xaf, 0x64,
-	0xf9, 0xa3, 0xa6, 0xe4, 0xe0, 0xd0, 0x93, 0x76, 0x46, 0x33, 0xbf, 0xd9, 0xf9, 0xcd, 0xc7, 0x92,
-	0xc7, 0x6e, 0x12, 0x78, 0x3e, 0x58, 0xe7, 0xbb, 0x2e, 0x48, 0xc7, 0x02, 0xd9, 0x85, 0x04, 0xd2,
-	0xa8, 0x23, 0xb1, 0x13, 0x23, 0x86, 0xc2, 0x8c, 0x13, 0x94, 0x48, 0x37, 0x32, 0x33, 0x33, 0x33,
-	0xdb, 0xdd, 0xae, 0xfb, 0xe8, 0xa3, 0xfa, 0x65, 0x0d, 0x4f, 0x99, 0xd5, 0xf6, 0x03, 0x1f, 0xd1,
-	0x0f, 0xc1, 0x52, 0x92, 0x9b, 0x9e, 0x59, 0x0e, 0x1f, 0x64, 0xbf, 0x8c, 0x5f, 0x1a, 0x59, 0x7f,
-	0x09, 0x21, 0xf8, 0x8e, 0x84, 0x53, 0x94, 0x40, 0xeb, 0xa4, 0xc2, 0x91, 0x33, 0xd0, 0xb5, 0xa6,
-	0xd6, 0x2a, 0xdb, 0x99, 0x40, 0xcf, 0xc8, 0x9a, 0x97, 0x59, 0x61, 0xa2, 0x97, 0x9a, 0x5a, 0xab,
-	0xba, 0x57, 0x37, 0x33, 0x54, 0x73, 0x84, 0x6a, 0xee, 0xf3, 0xc1, 0xc1, 0xde, 0xed, 0xd5, 0x8e,
-	0xe9, 0x07, 0xb2, 0x9b, 0xba, 0x26, 0xc3, 0xa8, 0xb8, 0xb8, 0xe5, 0x63, 0xbb, 0x38, 0x33, 0x8c,
-	0x22, 0xe4, 0xe6, 0xbe, 0xe7, 0x25, 0x20, 0x84, 0x3d, 0x86, 0xa6, 0xef, 0x48, 0x49, 0xa2, 0xbe,
-	0xbc, 0xe0, 0x00, 0x25, 0x89, 0xc3, 0xbc, 0x62, 0xec, 0x43, 0xa2, 0x97, 0xb3, 0xbc, 0x94, 0x60,
-	0xfc, 0xd4, 0xc8, 0xc6, 0x09, 0xbf, 0x03, 0x01, 0x1f, 0x48, 0xf9, 0x2c, 0xc1, 0x68, 0xe1, 0xb9,
-	0x2b, 0xd4, 0x69, 0x7a, 0x97, 0xef, 0x8d, 0x5e, 0xc3, 0x20, 0xe4, 0x30, 0x01, 0x47, 0xc2, 0x31,
-	0x62, 0x38, 0x3f, 0x53, 0xe3, 0x4b, 0x89, 0x6c, 0x66, 0x46, 0xa7, 0x4e, 0x18, 0x78, 0xaa, 0x2c,
-	0xf3, 0x39, 0x11, 0xa4, 0x56, 0xf4, 0xa5, 0x93, 0x05, 0x5b, 0x38, 0x3f, 0x9b, 0xa3, 0x1f, 0xb9,
-	0x82, 0x26, 0xa4, 0xc6, 0x90, 0x0b, 0xe0, 0x22, 0x15, 0x9d, 0x38, 0x75, 0x7b, 0x30, 0xf8, 0x2b,
-	0x63, 0xbb, 0xb7, 0x57, 0x3b, 0xed, 0x89, 0xa0, 0x0c, 0x45, 0x84, 0x22, 0xff, 0xb4, 0x85, 0xd7,
-	0xb3, 0xe4, 0x20, 0x06, 0x61, 0xee, 0x33, 0x56, 0xc4, 0x2c, 0x02, 0x1c, 0x2b, 0x7c, 0xfa, 0x90,
-	0xac, 0x81, 0xec, 0x76, 0x84, 0x74, 0x7a, 0x90, 0xf7, 0xcf, 0x2a, 0xc8, 0xee, 0xdb, 0xa1, 0x6c,
-	0x7c, 0x2b, 0x91, 0xcd, 0x93, 0xd8, 0xbb, 0x03, 0x5f, 0xf3, 0xae, 0x5e, 0xba, 0xe7, 0xab, 0x7f,
-	0x24, 0x75, 0x0e, 0xfd, 0xce, 0x1f, 0x75, 0x5a, 0x74, 0x93, 0x51, 0x0e, 0xfd, 0x57, 0x33, 0xa5,
-	0x32, 0xc8, 0xff, 0x79, 0xec, 0x29, 0xea, 0xaa, 0x99, 0xa9, 0x62, 0x8f, 0x52, 0x52, 0x86, 0x8b,
-	0x40, 0xea, 0x95, 0xa6, 0xd6, 0x5a, 0xb5, 0xd5, 0xd9, 0xf8, 0x54, 0x21, 0xb5, 0x37, 0xc2, 0x1f,
-	0xc1, 0x1d, 0x86, 0x4e, 0x10, 0xd1, 0x27, 0x64, 0xab, 0x48, 0x82, 0x75, 0x9d, 0x80, 0x77, 0x02,
-	0x2f, 0xa7, 0xb7, 0xe8, 0x91, 0xc3, 0xa1, 0xfe, 0xc8, 0x1b, 0x36, 0x26, 0x43, 0x2e, 0x13, 0x87,
-	0xc9, 0xfb, 0x6b, 0xcc, 0x51, 0x84, 0x7f, 0xd9, 0x98, 0xcf, 0x8a, 0xbd, 0x01, 0x42, 0x2f, 0x37,
-	0x97, 0x5b, 0xd5, 0xbd, 0x47, 0xe6, 0xf4, 0x93, 0x60, 0x4e, 0x2e, 0x37, 0x7b, 0x6c, 0x4e, 0x5f,
-	0x90, 0x6a, 0xca, 0xc7, 0xde, 0x15, 0xe5, 0xdd, 0x98, 0xf5, 0x9e, 0x5e, 0x8e, 0xf6, 0xa4, 0x0b,
-	0x7d, 0x4e, 0xd6, 0x99, 0x5a, 0x14, 0xd9, 0x93, 0xa4, 0xaf, 0x28, 0x88, 0xed, 0x59, 0x88, 0xf1,
-	0xc6, 0xb1, 0xab, 0xac, 0x38, 0x0b, 0xfa, 0x9a, 0x6c, 0xe5, 0xee, 0xe7, 0xa3, 0xc1, 0x11, 0xfa,
-	0x7f, 0x0a, 0x63, 0x67, 0x3e, 0x46, 0x31, 0x60, 0x76, 0x8d, 0x4d, 0x2b, 0x14, 0x5a, 0xaa, 0xa6,
-	0x70, 0x12, 0x6d, 0x75, 0x3e, 0xda, 0xcc, 0xb8, 0xda, 0xb5, 0x74, 0x5a, 0x21, 0x0e, 0x8e, 0xbe,
-	0x5e, 0x37, 0xb4, 0xcb, 0xeb, 0x86, 0xf6, 0xe3, 0xba, 0xa1, 0x7d, 0xbe, 0x69, 0x2c, 0x5d, 0xde,
-	0x34, 0x96, 0xbe, 0xdf, 0x34, 0x96, 0xde, 0x5b, 0x13, 0x25, 0x73, 0x43, 0xbc, 0x70, 0xe2, 0xd8,
-	0x52, 0xe9, 0xb7, 0x39, 0xc8, 0x3e, 0x26, 0x3d, 0xeb, 0xc2, 0xca, 0xdf, 0x6e, 0x55, 0x3f, 0x77,
-	0x45, 0x55, 0xfd, 0xe9, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb7, 0x12, 0x00, 0x4d, 0xd2, 0x07,
-	0x00, 0x00,
+	// 632 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x55, 0xcf, 0x6e, 0xd3, 0x4c,
+	0x10, 0xaf, 0x5d, 0xb7, 0x5f, 0xbb, 0xe9, 0xd7, 0xa6, 0xab, 0x1e, 0x4c, 0x41, 0x6e, 0x64, 0x09,
+	0x29, 0x42, 0xc2, 0x56, 0xe1, 0x86, 0x54, 0x44, 0x1b, 0x38, 0x54, 0x02, 0xa9, 0x18, 0xb5, 0x07,
+	0x2e, 0xd6, 0xda, 0x9e, 0xda, 0x56, 0x9d, 0x5d, 0xcb, 0xbb, 0x6e, 0xda, 0xb7, 0xe0, 0x15, 0x78,
+	0x16, 0x2e, 0x1c, 0x7b, 0x44, 0x3d, 0x44, 0x28, 0xb9, 0x73, 0xe2, 0x01, 0x50, 0xd6, 0x8e, 0x13,
+	0x87, 0x48, 0x14, 0x29, 0x15, 0xb7, 0xdd, 0xd9, 0x99, 0xdf, 0xcc, 0xfc, 0xe6, 0xcf, 0xa2, 0xc7,
+	0x5e, 0x16, 0x07, 0x21, 0xd8, 0x97, 0xfb, 0x1e, 0x08, 0x62, 0x83, 0x88, 0x20, 0x83, 0xbc, 0xeb,
+	0x0a, 0xe6, 0xa6, 0x8c, 0x25, 0xdc, 0x4a, 0x33, 0x26, 0x18, 0xde, 0x2c, 0xd4, 0xac, 0x42, 0x6d,
+	0x7f, 0x77, 0x27, 0x64, 0x21, 0x93, 0x4f, 0xf6, 0xe8, 0x54, 0x68, 0xed, 0x3e, 0x08, 0x19, 0x0b,
+	0x13, 0xb0, 0xe5, 0xcd, 0xcb, 0xcf, 0x6d, 0x42, 0xaf, 0x8b, 0x27, 0xf3, 0x87, 0x82, 0x36, 0x5e,
+	0x43, 0x02, 0x21, 0x11, 0x70, 0xc6, 0x04, 0xe0, 0x1d, 0xb4, 0x42, 0x19, 0xf5, 0x41, 0x57, 0x5a,
+	0x4a, 0x5b, 0x73, 0x8a, 0x0b, 0x76, 0xd1, 0x7a, 0x50, 0x68, 0xb1, 0x4c, 0x57, 0x5b, 0x4a, 0x7b,
+	0xe3, 0xe8, 0xf0, 0xb6, 0xbf, 0x77, 0x10, 0xc6, 0x22, 0xca, 0x3d, 0xcb, 0x67, 0x5d, 0xdb, 0x4b,
+	0xd8, 0x15, 0x49, 0x53, 0x5b, 0x86, 0xf7, 0x94, 0x82, 0xe8, 0xb1, 0xec, 0xc2, 0xe6, 0x11, 0xc9,
+	0x20, 0xb0, 0xc5, 0x75, 0x0a, 0xdc, 0x7a, 0x53, 0x66, 0x71, 0x18, 0x04, 0x19, 0x70, 0xee, 0x4c,
+	0x30, 0xf1, 0x7b, 0xa4, 0x0a, 0xa6, 0x2f, 0x2f, 0x0a, 0x59, 0x15, 0x6c, 0x94, 0x49, 0xca, 0x7a,
+	0x90, 0xe9, 0x5a, 0x91, 0x89, 0xbc, 0x98, 0x7d, 0x05, 0x6d, 0x9e, 0xd2, 0x3b, 0xa4, 0x7c, 0x8a,
+	0xb4, 0xf3, 0x8c, 0x75, 0x17, 0x97, 0xad, 0x84, 0xab, 0x33, 0xb9, 0xbc, 0x78, 0x26, 0x4d, 0x13,
+	0xa1, 0x4e, 0x06, 0x44, 0xc0, 0x09, 0x63, 0xc9, 0xfc, 0xdc, 0xcc, 0xcf, 0x2a, 0xda, 0x2a, 0x94,
+	0xce, 0x48, 0x12, 0x07, 0xb2, 0x02, 0xf3, 0x59, 0x48, 0x50, 0xb3, 0xea, 0x3d, 0x52, 0x38, 0x5b,
+	0x1c, 0x23, 0x5b, 0x50, 0x17, 0xe0, 0x2e, 0x6a, 0xfa, 0x8c, 0x72, 0xa0, 0x3c, 0xe7, 0x6e, 0x9a,
+	0x7b, 0x17, 0x70, 0x5d, 0x72, 0x74, 0x74, 0xdb, 0xdf, 0x7b, 0xf9, 0x77, 0xde, 0x3a, 0x63, 0xa4,
+	0xca, 0x5d, 0x85, 0x7d, 0x22, 0xa1, 0xf1, 0x43, 0xb4, 0x0e, 0x22, 0x72, 0xb9, 0x20, 0x17, 0x50,
+	0x76, 0xc9, 0x1a, 0x88, 0xe8, 0xc3, 0xe8, 0x6e, 0x7e, 0x51, 0xd1, 0xd6, 0x69, 0x1a, 0xdc, 0x81,
+	0xa3, 0x79, 0x51, 0xab, 0xf7, 0x17, 0x35, 0x47, 0x3b, 0x14, 0x7a, 0xee, 0x6f, 0x65, 0x59, 0x58,
+	0x33, 0x61, 0x0a, 0xbd, 0x19, 0x19, 0x36, 0xd1, 0xff, 0xa5, 0xd3, 0x1a, 0x5d, 0x8d, 0x42, 0x55,
+	0x32, 0x86, 0x31, 0xd2, 0xe0, 0x2a, 0x16, 0xfa, 0x4a, 0x4b, 0x69, 0xaf, 0x39, 0xf2, 0x6c, 0xfe,
+	0xd4, 0x50, 0xf3, 0x1d, 0x0f, 0xc7, 0x70, 0x9d, 0x84, 0xc4, 0x5d, 0xfc, 0x04, 0x6d, 0x57, 0xd1,
+	0xfb, 0x11, 0x89, 0xa9, 0x1b, 0x07, 0x25, 0xa5, 0x55, 0x4b, 0x74, 0x46, 0xf2, 0xe3, 0x60, 0xd4,
+	0x80, 0x3e, 0xa3, 0x22, 0x23, 0xbe, 0xb8, 0x87, 0x06, 0x1c, 0x43, 0xff, 0xa3, 0x06, 0x7c, 0x51,
+	0x2d, 0x03, 0xe0, 0xba, 0xd6, 0x5a, 0x6e, 0x37, 0x9e, 0x3d, 0xb2, 0xea, 0x2b, 0xdd, 0x9a, 0x5e,
+	0x55, 0xce, 0x44, 0x1d, 0xbf, 0x42, 0x8d, 0x9c, 0x4e, 0xac, 0x57, 0xa4, 0xb5, 0x31, 0x6b, 0x5d,
+	0x5f, 0x75, 0xce, 0xb4, 0x09, 0x3e, 0x40, 0x1b, 0xbe, 0x5c, 0x02, 0xc5, 0x97, 0xa2, 0xaf, 0x4a,
+	0x88, 0xdd, 0x59, 0x88, 0xc9, 0x36, 0x71, 0x1a, 0x7e, 0x75, 0xe6, 0xf8, 0x2d, 0xda, 0x2e, 0xcd,
+	0x2f, 0xc7, 0x03, 0xc2, 0xf5, 0xff, 0x24, 0xc6, 0xde, 0x7c, 0x8c, 0x6a, 0x90, 0x9c, 0xa6, 0x5f,
+	0x17, 0x48, 0xb4, 0x5c, 0x4e, 0xdb, 0x34, 0xda, 0xda, 0x7c, 0xb4, 0x99, 0xb1, 0x74, 0x9a, 0x79,
+	0x5d, 0xc0, 0x8f, 0x8e, 0xbf, 0x0e, 0x0c, 0xe5, 0x66, 0x60, 0x28, 0xdf, 0x07, 0x86, 0xf2, 0x69,
+	0x68, 0x2c, 0xdd, 0x0c, 0x8d, 0xa5, 0x6f, 0x43, 0x63, 0xe9, 0xa3, 0xfd, 0xc7, 0x1a, 0x5e, 0xd9,
+	0xe5, 0xdf, 0x2b, 0xab, 0xe8, 0xad, 0xca, 0x8f, 0xf2, 0xf9, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x69, 0x22, 0xa3, 0x83, 0x92, 0x07, 0x00, 0x00,
 }
 
 func (m *DelegateVote) Marshal() (dAtA []byte, err error) {
@@ -532,11 +459,11 @@ func (m *DelegateVote) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.To != nil {
 		{
-			size, err := m.To.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.To.Size()
+			i -= size
+			if _, err := m.To.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -544,11 +471,11 @@ func (m *DelegateVote) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.Delegator != nil {
 		{
-			size, err := m.Delegator.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.Delegator.Size()
+			i -= size
+			if _, err := m.Delegator.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -584,11 +511,11 @@ func (m *UnDelegateVote) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = l
 	if m.Delegator != nil {
 		{
-			size, err := m.Delegator.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.Delegator.Size()
+			i -= size
+			if _, err := m.Delegator.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -596,11 +523,11 @@ func (m *UnDelegateVote) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.From != nil {
 		{
-			size, err := m.From.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.From.Size()
+			i -= size
+			if _, err := m.From.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -669,11 +596,11 @@ func (m *CreateValidator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.ConsensusPubkey != nil {
 		{
-			size, err := m.ConsensusPubkey.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.ConsensusPubkey.Size()
+			i -= size
+			if _, err := m.ConsensusPubkey.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -681,11 +608,11 @@ func (m *CreateValidator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.EthereumAddress != nil {
 		{
-			size, err := m.EthereumAddress.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.EthereumAddress.Size()
+			i -= size
+			if _, err := m.EthereumAddress.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -736,11 +663,11 @@ func (m *UpdateValidator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.NewEthereumAddress != nil {
 		{
-			size, err := m.NewEthereumAddress.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.NewEthereumAddress.Size()
+			i -= size
+			if _, err := m.NewEthereumAddress.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -748,11 +675,11 @@ func (m *UpdateValidator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.ConsensusPubkey != nil {
 		{
-			size, err := m.ConsensusPubkey.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.ConsensusPubkey.Size()
+			i -= size
+			if _, err := m.ConsensusPubkey.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -858,11 +785,11 @@ func (m *MsgEthereumClaim) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.ConsensusPubkey != nil {
 		{
-			size, err := m.ConsensusPubkey.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.ConsensusPubkey.Size()
+			i -= size
+			if _, err := m.ConsensusPubkey.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -870,11 +797,11 @@ func (m *MsgEthereumClaim) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	if m.ContractAddress != nil {
 		{
-			size, err := m.ContractAddress.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.ContractAddress.Size()
+			i -= size
+			if _, err := m.ContractAddress.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
 			i = encodeVarintEthereumToPools(dAtA, i, uint64(size))
 		}
 		i--
@@ -1111,7 +1038,7 @@ func (m *DelegateVote) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Delegator", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1121,24 +1048,23 @@ func (m *DelegateVote) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Delegator == nil {
-				m.Delegator = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.Delegator = &v
 			if err := m.Delegator.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1147,7 +1073,7 @@ func (m *DelegateVote) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field To", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1157,24 +1083,23 @@ func (m *DelegateVote) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.To == nil {
-				m.To = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.To = &v
 			if err := m.To.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1274,7 +1199,7 @@ func (m *UnDelegateVote) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field From", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1284,24 +1209,23 @@ func (m *UnDelegateVote) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.From == nil {
-				m.From = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.From = &v
 			if err := m.From.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1310,7 +1234,7 @@ func (m *UnDelegateVote) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Delegator", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1320,24 +1244,23 @@ func (m *UnDelegateVote) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Delegator == nil {
-				m.Delegator = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.Delegator = &v
 			if err := m.Delegator.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1490,7 +1413,7 @@ func (m *CreateValidator) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EthereumAddress", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1500,24 +1423,23 @@ func (m *CreateValidator) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.EthereumAddress == nil {
-				m.EthereumAddress = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.EthereumAddress = &v
 			if err := m.EthereumAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1526,7 +1448,7 @@ func (m *CreateValidator) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1536,24 +1458,23 @@ func (m *CreateValidator) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ConsensusPubkey == nil {
-				m.ConsensusPubkey = &github_com_cosmos_cosmos_sdk_types.AccAddress{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.ConsensusAddress
+			m.ConsensusPubkey = &v
 			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1653,7 +1574,7 @@ func (m *UpdateValidator) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1663,24 +1584,23 @@ func (m *UpdateValidator) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ConsensusPubkey == nil {
-				m.ConsensusPubkey = &github_com_cosmos_cosmos_sdk_types.AccAddress{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.ConsensusAddress
+			m.ConsensusPubkey = &v
 			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1689,7 +1609,7 @@ func (m *UpdateValidator) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field NewEthereumAddress", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1699,24 +1619,23 @@ func (m *UpdateValidator) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.NewEthereumAddress == nil {
-				m.NewEthereumAddress = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.NewEthereumAddress = &v
 			if err := m.NewEthereumAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1836,7 +1755,7 @@ func (m *MsgEthereumClaim) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ContractAddress", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1846,24 +1765,23 @@ func (m *MsgEthereumClaim) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ContractAddress == nil {
-				m.ContractAddress = &github_com_ethereum_go_ethereum_common.Address{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.ContractAddress = &v
 			if err := m.ContractAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -1872,7 +1790,7 @@ func (m *MsgEthereumClaim) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
 			}
-			var msglen int
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEthereumToPools
@@ -1882,24 +1800,23 @@ func (m *MsgEthereumClaim) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEthereumToPools
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ConsensusPubkey == nil {
-				m.ConsensusPubkey = &github_com_cosmos_cosmos_sdk_types.AccAddress{}
-			}
+			var v github_com_bloxapp_pools_network_shared_types.ConsensusAddress
+			m.ConsensusPubkey = &v
 			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}

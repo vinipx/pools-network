@@ -1,0 +1,5 @@
+syntax = "proto3";
+package poolsnetwork.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
+

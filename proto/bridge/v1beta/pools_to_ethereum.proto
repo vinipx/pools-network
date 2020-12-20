@@ -1,0 +1,39 @@
+syntax = "proto3";
+package bridge.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/bridge/types";
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
+
+message ValSetChange {
+  google.protobuf.Any address   = 1 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"]; // the operator's ethereum address
+  uint64 new_power              = 2;
+}
+
+message ETHBalanceChange {
+  uint64 total_eth = 1;
+}
+
+message Withdraw {
+  bytes to                            = 1;
+  uint64 amount                       = 2;
+  google.protobuf.Any coin_address    = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"];
+}
+
+// nonce is the monotonic id of an update
+message MsgBridgedUpdate {
+  uint64 nonce                          = 1;
+  repeated ValSetChange val_set_change  = 2;
+  ETHBalanceChange new_balance          = 3;
+  repeated Withdraw withdrawals         = 4;
+}
+
+// MsgBridgedUpdateConfirm is a signed container for a bridged update (pools -> ethereum).
+// This is a single operator's signatur.
+// nonce is the monotonic id of an update
+message MsgBridgedUpdateConfirm {
+  uint64 nonce                          = 1;
+  bytes signature                       = 2;
+  google.protobuf.Any ethereum_address  = 3 [(gogoproto.casttype) = "github.com/ethereum/go-ethereum/common.Address"]; // the operator's ethereum address
+}

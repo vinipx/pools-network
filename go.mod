@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/cosmos/cosmos-sdk v0.40.0-rc0
+	github.com/ethereum/go-ethereum v1.9.25 // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.15.0

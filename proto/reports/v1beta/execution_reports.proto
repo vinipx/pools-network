@@ -1,0 +1,17 @@
+syntax = "proto3";
+package reports.v1beta1;
+
+option go_package = "github.com/bloxapp/pools-network/x/reports/types";
+
+message BeaconDuty {
+  int32 type = 1; // 0 - attestation, 1 - proposal, 2 - aggregation
+  uint64 committee = 2;
+  uint64 slot = 3;
+}
+
+// MsgExecutionReport is a single message encapsulating a single pool's (in a single epoch) duty execution.
+message MsgExecutionReport {
+  uint64 PoolId = 1;
+  uint64 Epoch = 2;
+  repeated BeaconDuty Duties = 3;
+}

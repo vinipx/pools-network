@@ -5,8 +5,12 @@ package types
 
 import (
 	fmt "fmt"
+	github_com_bloxapp_pools_network_shared_types "github.com/bloxapp/pools-network/shared/types"
+	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
+	io "io"
 	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -20,19 +24,804 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Operator represents a pools network operator, not to be confused with validator which is an entity local to the Tendermint protocol.
+// An Operator has the responsibility of executing various tasks within the pools network, post collateral and so on.
+type Operator struct {
+	Id              uint64                                                          `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	EthereumAddress github_com_bloxapp_pools_network_shared_types.EthereumAddress   `protobuf:"bytes,2,opt,name=ethereum_address,json=ethereumAddress,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"ethereum_address"`
+	ConsensusPubkey *github_com_bloxapp_pools_network_shared_types.ConsensusAddress `protobuf:"bytes,3,opt,name=consensus_pubkey,json=consensusPubkey,proto3,customtype=github.com/bloxapp/pools-network/shared/types.ConsensusAddress" json:"consensus_pubkey,omitempty"`
+	EthStake        uint64                                                          `protobuf:"varint,4,opt,name=eth_stake,json=ethStake,proto3" json:"eth_stake,omitempty"`
+	CdtBalance      uint64                                                          `protobuf:"varint,5,opt,name=cdt_balance,json=cdtBalance,proto3" json:"cdt_balance,omitempty"`
+}
+
+func (m *Operator) Reset()         { *m = Operator{} }
+func (m *Operator) String() string { return proto.CompactTextString(m) }
+func (*Operator) ProtoMessage()    {}
+func (*Operator) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a0e60acd720822a7, []int{0}
+}
+func (m *Operator) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Operator) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Operator.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Operator) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Operator.Merge(m, src)
+}
+func (m *Operator) XXX_Size() int {
+	return m.Size()
+}
+func (m *Operator) XXX_DiscardUnknown() {
+	xxx_messageInfo_Operator.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Operator proto.InternalMessageInfo
+
+func (m *Operator) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *Operator) GetEthStake() uint64 {
+	if m != nil {
+		return m.EthStake
+	}
+	return 0
+}
+
+func (m *Operator) GetCdtBalance() uint64 {
+	if m != nil {
+		return m.CdtBalance
+	}
+	return 0
+}
+
+type UpdateOperator struct {
+	Nonce              uint64                                                          `protobuf:"varint,1,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	ConsensusPubkey    *github_com_bloxapp_pools_network_shared_types.ConsensusAddress `protobuf:"bytes,2,opt,name=consensus_pubkey,json=consensusPubkey,proto3,customtype=github.com/bloxapp/pools-network/shared/types.ConsensusAddress" json:"consensus_pubkey,omitempty"`
+	NewEthereumAddress *github_com_bloxapp_pools_network_shared_types.EthereumAddress  `protobuf:"bytes,3,opt,name=new_ethereum_address,json=newEthereumAddress,proto3,customtype=github.com/bloxapp/pools-network/shared/types.EthereumAddress" json:"new_ethereum_address,omitempty"`
+	NewEthStake        uint64                                                          `protobuf:"varint,4,opt,name=new_eth_stake,json=newEthStake,proto3" json:"new_eth_stake,omitempty"`
+	Exit               bool                                                            `protobuf:"varint,5,opt,name=exit,proto3" json:"exit,omitempty"`
+}
+
+func (m *UpdateOperator) Reset()         { *m = UpdateOperator{} }
+func (m *UpdateOperator) String() string { return proto.CompactTextString(m) }
+func (*UpdateOperator) ProtoMessage()    {}
+func (*UpdateOperator) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a0e60acd720822a7, []int{1}
+}
+func (m *UpdateOperator) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateOperator) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateOperator.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateOperator) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateOperator.Merge(m, src)
+}
+func (m *UpdateOperator) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateOperator) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateOperator.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateOperator proto.InternalMessageInfo
+
+func (m *UpdateOperator) GetNonce() uint64 {
+	if m != nil {
+		return m.Nonce
+	}
+	return 0
+}
+
+func (m *UpdateOperator) GetNewEthStake() uint64 {
+	if m != nil {
+		return m.NewEthStake
+	}
+	return 0
+}
+
+func (m *UpdateOperator) GetExit() bool {
+	if m != nil {
+		return m.Exit
+	}
+	return false
+}
+
+func init() {
+	proto.RegisterType((*Operator)(nil), "poolsnetwork.v1beta1.Operator")
+	proto.RegisterType((*UpdateOperator)(nil), "poolsnetwork.v1beta1.UpdateOperator")
+}
+
 func init() {
 	proto.RegisterFile("poolsnetwork/v1beta/operator.proto", fileDescriptor_a0e60acd720822a7)
 }
 
 var fileDescriptor_a0e60acd720822a7 = []byte{
-	// 136 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2a, 0xc8, 0xcf, 0xcf,
-	0x29, 0xce, 0x4b, 0x2d, 0x29, 0xcf, 0x2f, 0xca, 0xd6, 0x2f, 0x33, 0x4c, 0x4a, 0x2d, 0x49, 0xd4,
-	0xcf, 0x2f, 0x48, 0x2d, 0x4a, 0x2c, 0xc9, 0x2f, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x12,
-	0x41, 0x56, 0xa3, 0x07, 0x51, 0x63, 0xe8, 0xe4, 0x7f, 0xe2, 0x91, 0x1c, 0xe3, 0x85, 0x47, 0x72,
-	0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c, 0xc3, 0x8d, 0xc7,
-	0x72, 0x0c, 0x51, 0xa6, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9, 0xb9, 0xfa, 0x49,
-	0x39, 0xf9, 0x15, 0x89, 0x05, 0x05, 0xfa, 0x60, 0x23, 0x74, 0x61, 0xf6, 0x54, 0xe8, 0xa3, 0x58,
-	0x5b, 0x52, 0x59, 0x90, 0x5a, 0x9c, 0xc4, 0x06, 0xb6, 0xcd, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff,
-	0x27, 0x7e, 0x9e, 0xb5, 0x93, 0x00, 0x00, 0x00,
+	// 395 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x53, 0x41, 0x8b, 0xda, 0x40,
+	0x14, 0x4e, 0x52, 0x2d, 0x76, 0x6c, 0xad, 0x0c, 0x39, 0x84, 0x16, 0x12, 0xc9, 0xc9, 0x4b, 0x13,
+	0xa4, 0xf4, 0xd8, 0x82, 0x29, 0x9e, 0x2d, 0x96, 0x5e, 0x7a, 0x09, 0x93, 0xcc, 0xc3, 0x04, 0x35,
+	0x33, 0x64, 0x26, 0x55, 0xff, 0x45, 0xff, 0x4e, 0xaf, 0x3d, 0x79, 0xf4, 0xb8, 0x78, 0x90, 0x45,
+	0xff, 0xc8, 0xe2, 0x8c, 0xca, 0xba, 0xbb, 0xb0, 0x2c, 0xcb, 0xde, 0xde, 0x7b, 0xf3, 0xcd, 0xf7,
+	0xbd, 0xf7, 0xbd, 0x19, 0xe4, 0x73, 0xc6, 0xa6, 0xa2, 0x00, 0x39, 0x67, 0xe5, 0x24, 0xfc, 0xd3,
+	0x4b, 0x40, 0x92, 0x90, 0x71, 0x28, 0x89, 0x64, 0x65, 0xc0, 0x4b, 0x26, 0x19, 0xb6, 0x6f, 0x63,
+	0x02, 0x8d, 0xe9, 0x7d, 0xb0, 0xc7, 0x6c, 0xcc, 0x14, 0x20, 0x3c, 0x44, 0x1a, 0xeb, 0xff, 0xb3,
+	0x50, 0x63, 0x78, 0xbc, 0x8e, 0x5b, 0xc8, 0xca, 0xa9, 0x63, 0x76, 0xcc, 0x6e, 0x6d, 0x64, 0xe5,
+	0x14, 0x73, 0xd4, 0x06, 0x99, 0x41, 0x09, 0xd5, 0x2c, 0x26, 0x94, 0x96, 0x20, 0x84, 0x63, 0x75,
+	0xcc, 0xee, 0xdb, 0x68, 0xb0, 0xda, 0x7a, 0xc6, 0x66, 0xeb, 0x7d, 0x1d, 0xe7, 0x32, 0xab, 0x92,
+	0x20, 0x65, 0xb3, 0x30, 0x99, 0xb2, 0x05, 0xe1, 0x3c, 0x54, 0xea, 0x9f, 0x4e, 0x2d, 0x8a, 0x8c,
+	0x94, 0x40, 0x43, 0xb9, 0xe4, 0x20, 0x82, 0xc1, 0x91, 0xad, 0xaf, 0xc9, 0x46, 0xef, 0xe1, 0xb2,
+	0x80, 0x67, 0xa8, 0x9d, 0xb2, 0x42, 0x40, 0x21, 0x2a, 0x11, 0xf3, 0x2a, 0x99, 0xc0, 0xd2, 0x79,
+	0xa5, 0x14, 0xa3, 0xcd, 0xd6, 0xfb, 0xf6, 0x34, 0xb5, 0xef, 0x27, 0xa6, 0xb3, 0xdc, 0x99, 0xfb,
+	0x87, 0xa2, 0xc6, 0x1f, 0xd1, 0x1b, 0x90, 0x59, 0x2c, 0x24, 0x99, 0x80, 0x53, 0x53, 0x73, 0x37,
+	0x40, 0x66, 0x3f, 0x0f, 0x39, 0xf6, 0x50, 0x33, 0xa5, 0x32, 0x4e, 0xc8, 0x94, 0x14, 0x29, 0x38,
+	0x75, 0x75, 0x8c, 0x52, 0x2a, 0x23, 0x5d, 0xf1, 0xff, 0x5b, 0xa8, 0xf5, 0x8b, 0x53, 0x22, 0xe1,
+	0xec, 0xa0, 0x8d, 0xea, 0x05, 0x3b, 0xa0, 0xb5, 0x89, 0x3a, 0x79, 0x70, 0x2a, 0xeb, 0xe5, 0xa6,
+	0x12, 0xc8, 0x2e, 0x60, 0x1e, 0xdf, 0x5b, 0x9d, 0x36, 0xb2, 0xff, 0xfc, 0xb5, 0xe1, 0x02, 0xe6,
+	0x77, 0x6a, 0xd8, 0x47, 0xef, 0x8e, 0xa2, 0x17, 0x76, 0x36, 0x35, 0x54, 0x3b, 0x8a, 0x51, 0x0d,
+	0x16, 0xb9, 0x54, 0x56, 0x36, 0x46, 0x2a, 0x8e, 0x86, 0xab, 0x9d, 0x6b, 0xae, 0x77, 0xae, 0x79,
+	0xbd, 0x73, 0xcd, 0xbf, 0x7b, 0xd7, 0x58, 0xef, 0x5d, 0xe3, 0x6a, 0xef, 0x1a, 0xbf, 0xbf, 0x3c,
+	0xda, 0xe4, 0x22, 0xbc, 0xf8, 0x0d, 0xaa, 0xd9, 0xe4, 0xb5, 0x7a, 0xd8, 0x9f, 0x6f, 0x02, 0x00,
+	0x00, 0xff, 0xff, 0xce, 0xbd, 0x1e, 0xe3, 0x2a, 0x03, 0x00, 0x00,
 }
+
+func (m *Operator) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Operator) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Operator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.CdtBalance != 0 {
+		i = encodeVarintOperator(dAtA, i, uint64(m.CdtBalance))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.EthStake != 0 {
+		i = encodeVarintOperator(dAtA, i, uint64(m.EthStake))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.ConsensusPubkey != nil {
+		{
+			size := m.ConsensusPubkey.Size()
+			i -= size
+			if _, err := m.ConsensusPubkey.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+			i = encodeVarintOperator(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	{
+		size := m.EthereumAddress.Size()
+		i -= size
+		if _, err := m.EthereumAddress.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintOperator(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if m.Id != 0 {
+		i = encodeVarintOperator(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateOperator) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateOperator) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateOperator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Exit {
+		i--
+		if m.Exit {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.NewEthStake != 0 {
+		i = encodeVarintOperator(dAtA, i, uint64(m.NewEthStake))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.NewEthereumAddress != nil {
+		{
+			size := m.NewEthereumAddress.Size()
+			i -= size
+			if _, err := m.NewEthereumAddress.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+			i = encodeVarintOperator(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.ConsensusPubkey != nil {
+		{
+			size := m.ConsensusPubkey.Size()
+			i -= size
+			if _, err := m.ConsensusPubkey.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+			i = encodeVarintOperator(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Nonce != 0 {
+		i = encodeVarintOperator(dAtA, i, uint64(m.Nonce))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func encodeVarintOperator(dAtA []byte, offset int, v uint64) int {
+	offset -= sovOperator(v)
+	base := offset
+	for v >= 1<<7 {
+		dAtA[offset] = uint8(v&0x7f | 0x80)
+		v >>= 7
+		offset++
+	}
+	dAtA[offset] = uint8(v)
+	return base
+}
+func (m *Operator) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovOperator(uint64(m.Id))
+	}
+	l = m.EthereumAddress.Size()
+	n += 1 + l + sovOperator(uint64(l))
+	if m.ConsensusPubkey != nil {
+		l = m.ConsensusPubkey.Size()
+		n += 1 + l + sovOperator(uint64(l))
+	}
+	if m.EthStake != 0 {
+		n += 1 + sovOperator(uint64(m.EthStake))
+	}
+	if m.CdtBalance != 0 {
+		n += 1 + sovOperator(uint64(m.CdtBalance))
+	}
+	return n
+}
+
+func (m *UpdateOperator) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Nonce != 0 {
+		n += 1 + sovOperator(uint64(m.Nonce))
+	}
+	if m.ConsensusPubkey != nil {
+		l = m.ConsensusPubkey.Size()
+		n += 1 + l + sovOperator(uint64(l))
+	}
+	if m.NewEthereumAddress != nil {
+		l = m.NewEthereumAddress.Size()
+		n += 1 + l + sovOperator(uint64(l))
+	}
+	if m.NewEthStake != 0 {
+		n += 1 + sovOperator(uint64(m.NewEthStake))
+	}
+	if m.Exit {
+		n += 2
+	}
+	return n
+}
+
+func sovOperator(x uint64) (n int) {
+	return (math_bits.Len64(x|1) + 6) / 7
+}
+func sozOperator(x uint64) (n int) {
+	return sovOperator(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *Operator) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOperator
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Operator: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Operator: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EthereumAddress", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthOperator
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.EthereumAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthOperator
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			var v github_com_bloxapp_pools_network_shared_types.ConsensusAddress
+			m.ConsensusPubkey = &v
+			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EthStake", wireType)
+			}
+			m.EthStake = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EthStake |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CdtBalance", wireType)
+			}
+			m.CdtBalance = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CdtBalance |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOperator(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateOperator) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOperator
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateOperator: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateOperator: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Nonce", wireType)
+			}
+			m.Nonce = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Nonce |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthOperator
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			var v github_com_bloxapp_pools_network_shared_types.ConsensusAddress
+			m.ConsensusPubkey = &v
+			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NewEthereumAddress", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthOperator
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			var v github_com_bloxapp_pools_network_shared_types.EthereumAddress
+			m.NewEthereumAddress = &v
+			if err := m.NewEthereumAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NewEthStake", wireType)
+			}
+			m.NewEthStake = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NewEthStake |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Exit", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Exit = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOperator(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthOperator
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func skipOperator(dAtA []byte) (n int, err error) {
+	l := len(dAtA)
+	iNdEx := 0
+	depth := 0
+	for iNdEx < l {
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return 0, ErrIntOverflowOperator
+			}
+			if iNdEx >= l {
+				return 0, io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		wireType := int(wire & 0x7)
+		switch wireType {
+		case 0:
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				iNdEx++
+				if dAtA[iNdEx-1] < 0x80 {
+					break
+				}
+			}
+		case 1:
+			iNdEx += 8
+		case 2:
+			var length int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowOperator
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				length |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if length < 0 {
+				return 0, ErrInvalidLengthOperator
+			}
+			iNdEx += length
+		case 3:
+			depth++
+		case 4:
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupOperator
+			}
+			depth--
+		case 5:
+			iNdEx += 4
+		default:
+			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
+		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthOperator
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
+	}
+	return 0, io.ErrUnexpectedEOF
+}
+
+var (
+	ErrInvalidLengthOperator        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowOperator          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupOperator = fmt.Errorf("proto: unexpected end of group")
+)

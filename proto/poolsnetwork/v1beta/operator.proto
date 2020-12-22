@@ -3,3 +3,24 @@ package poolsnetwork.v1beta1;
 
 option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
 
+import "gogoproto/gogo.proto";
+
+// Operator represents a pools network operator, not to be confused with validator which is an entity local to the Tendermint protocol.
+// An Operator has the responsibility of executing various tasks within the pools network, post collateral and so on.
+message Operator {
+  uint64 id               = 1;
+  bytes ethereum_address  = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress", (gogoproto.nullable) = false];
+  bytes consensus_pubkey  = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  uint64 eth_stake        = 4; // in gwei
+  uint64 cdt_balance      = 5;
+  //  bool slashed            = 6; //TODO should be dealt within the normal validator cycle?
+  //  bool exited             = 7;
+}
+
+message UpdateOperator {
+  uint64 nonce                              = 1;
+  bytes consensus_pubkey                    = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  bytes new_ethereum_address                = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  uint64 new_eth_stake                      = 4; // in gwei
+  bool exit                                 = 5;
+}

@@ -309,6 +309,7 @@ func New(
 	)
 	app.bridgeKeeper = *bridgekeeper.NewKeeper(
 		appCodec,
+		app.GetSubspace(bridgetypes.ModuleName),
 		keys[bridgetypes.StoreKey],
 		keys[bridgetypes.MemStoreKey],
 	)

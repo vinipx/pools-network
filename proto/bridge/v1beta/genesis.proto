@@ -3,6 +3,16 @@ package poolsnetwork.bridge.v1beta1;
 
 option go_package = "github.com/bloxapp/pools-network/x/bridge/types";
 
+import "gogoproto/gogo.proto";
+
+message Params {
+  uint64 max_delegate_votes_claims    = 1; // max delegate votes in a single MsgEthereumClaim
+  uint64 max_undelegate_votes_claims  = 2; // max undelegate votes in a single MsgEthereumClaim
+  uint64 max_create_pools_claims      = 3; // max create pools in a single MsgEthereumClaim
+  uint64 max_create_operator_claims   = 4; // max create operator in a single MsgEthereumClaim
+}
+
 // GenesisState defines the bridge module's genesis state.
 message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
 }

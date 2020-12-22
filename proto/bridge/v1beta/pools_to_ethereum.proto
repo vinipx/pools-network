@@ -22,7 +22,7 @@ message Withdraw {
 }
 
 // nonce is the monotonic id of an update
-message MsgBridgedUpdate {
+message BridgedUpdate {
   uint64 nonce                          = 1;
   repeated ValSetChange val_set_change  = 2;
   ETHBalanceChange new_balance          = 3;

@@ -5,40 +5,43 @@ option go_package = "github.com/bloxapp/pools-network/x/bridge/types";
 
 import "gogoproto/gogo.proto";
 
-message DelegateVote {
-  uint64 nonce                      = 1;
-  bytes delegator     = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-  bytes to            = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-  uint64 power                      = 4;
+enum ClaimType {
+  Delegate = 0;
+  Undelegate = 1;
+  CreatePool = 2;
+  CreateOperator = 3;
 }
 
-message UnDelegateVote {
-  uint64 nonce                      = 1;
-  bytes from          = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-  bytes delegator     = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-}
-
-message CreatePool {
-  uint64 nonce        = 1;
-}
-
-message CreateOperator {
-  uint64 nonce                          = 1;
-  bytes ethereum_address                = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-  bytes consensus_pubkey                = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
-  uint64 eth_stake                      = 4; // in gwei
+// ClaimData has a bunch of fields for different claims to use, all of them (except tx_hash and claim type) are optional
+message ClaimData {
+  bytes tx_hash                       = 1;
+  ClaimType claimType                 = 2;
+  repeated bytes ethereum_addresses   = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
+  repeated bytes consensus_addresses  = 4 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"];
+  repeated uint64 values              = 5; // optional by default
 }
 
 // MsgEthereumClaim is a container for events that happened on the ethereum blockchain.
 // It's essentially an ethereum -> pools oracle
-// each event has nonce, a monotonic id of the claim
+// The nonce is a monotonic id of the claim msg, it has to be sequential
 // Due to eth1 probabilistic finality, each validator on the pools network will need to attest to all claims to make them be included in the state (2/3 vote).
 message MsgEthereumClaim {
-  uint64 ethereum_chain_id                    = 1;
-  bytes contract_address                      = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress"];
-  bytes consensus_pubkey                      = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress"]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
-  repeated DelegateVote delegates             = 4;
-  repeated UnDelegateVote undelegates         = 5;
-  repeated CreatePool create_pools            = 6;
-  repeated CreateOperator create_operators    = 7;
+  uint64 nonce                                = 1;
+  uint64 ethereum_chain_id                    = 2;
+  bytes contract_address                      = 3 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress", (gogoproto.nullable) = false];
+  bytes consensus_address                     = 4 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress", (gogoproto.nullable) = false]; // The consensus pubkey which represents the operator in the Cosmos-SDK network
+  repeated ClaimData data                     = 5;
+}
+
+// ClaimAttestation is a container for counting claim attestations
+message ClaimAttestation {
+  bytes claim_id            = 1;
+  repeated bytes votes      = 2 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.ConsensusAddress", (gogoproto.nullable) = false];
+  uint64 accumulated_power  = 3;
+  bool finalized            = 4;
+}
+
+message EthereumBridgeContact {
+  bytes contract_address  = 1 [(gogoproto.customtype) = "github.com/bloxapp/pools-network/shared/types.EthereumAddress", (gogoproto.nullable) = false];
+  uint64 chain_id         = 2;
 }

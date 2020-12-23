@@ -38,62 +38,23 @@ func TestNewMsgEthereumClaimAnteHandler(t *testing.T) {
 		{
 			name: "valid",
 			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       []*types.DelegateVote{},
-				Undelegates:     []*types.UnDelegateVote{},
-				CreatePools:     []*types.CreatePool{},
-				CreateOperators: []*types.CreateOperator{},
+				Data: make([]*types.ClaimData, 24),
 			},
 			errStr: "",
 		},
 		{
 			name: "max claims and votes, valid",
 			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       make([]*types.DelegateVote, 10),
-				Undelegates:     make([]*types.UnDelegateVote, 10),
-				CreatePools:     make([]*types.CreatePool, 10),
-				CreateOperators: make([]*types.CreateOperator, 10),
+				Data: make([]*types.ClaimData, 25),
 			},
 			errStr: "",
 		},
 		{
-			name: "too may delegate votes",
+			name: "too may claims",
 			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       make([]*types.DelegateVote, 11),
-				Undelegates:     []*types.UnDelegateVote{},
-				CreatePools:     []*types.CreatePool{},
-				CreateOperators: []*types.CreateOperator{},
+				Data: make([]*types.ClaimData, 26),
 			},
-			errStr: "maximum number of delegate votes is 10 but received 11: Ivalid MsgEthereumClaimAnteHandler",
-		},
-		{
-			name: "too may un-delegate votes",
-			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       []*types.DelegateVote{},
-				Undelegates:     make([]*types.UnDelegateVote, 11),
-				CreatePools:     []*types.CreatePool{},
-				CreateOperators: []*types.CreateOperator{},
-			},
-			errStr: "maximum number of un-delegate votes is 10 but received 11: Ivalid MsgEthereumClaimAnteHandler",
-		},
-		{
-			name: "too create pool claims",
-			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       []*types.DelegateVote{},
-				Undelegates:     []*types.UnDelegateVote{},
-				CreatePools:     make([]*types.CreatePool, 11),
-				CreateOperators: []*types.CreateOperator{},
-			},
-			errStr: "maximum number of create pool claims is 10 but received 11: Ivalid MsgEthereumClaimAnteHandler",
-		},
-		{
-			name: "too create operator claims",
-			msgEthereumClaim: &types.MsgEthereumClaim{
-				Delegates:       []*types.DelegateVote{},
-				Undelegates:     []*types.UnDelegateVote{},
-				CreatePools:     []*types.CreatePool{},
-				CreateOperators: make([]*types.CreateOperator, 11),
-			},
-			errStr: "maximum number of create operator claimss is 10 but received 11 characters: Ivalid MsgEthereumClaimAnteHandler",
+			errStr: "maximum number of claims is 25 but received 26: Ivalid MsgEthereumClaimAnteHandler",
 		},
 	}
 

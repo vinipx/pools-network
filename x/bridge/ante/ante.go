@@ -33,34 +33,10 @@ func (sud MsgEthereumClaimAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, si
 		}
 
 		// max delegate number
-		if uint64(len(claims.Delegates)) > params.MaxDelegateVotesClaims {
+		if uint64(len(claims.Data)) > params.MaxClaims {
 			return ctx, sdkerrors.Wrapf(ErrInvalidMsg,
-				"maximum number of delegate votes is %d but received %d",
-				params.MaxDelegateVotesClaims, len(claims.Delegates),
-			)
-		}
-
-		// max un-delegate number
-		if uint64(len(claims.Undelegates)) > params.MaxUndelegateVotesClaims {
-			return ctx, sdkerrors.Wrapf(ErrInvalidMsg,
-				"maximum number of un-delegate votes is %d but received %d",
-				params.MaxUndelegateVotesClaims, len(claims.Undelegates),
-			)
-		}
-
-		// max create pools
-		if uint64(len(claims.CreatePools)) > params.MaxCreatePoolsClaims {
-			return ctx, sdkerrors.Wrapf(ErrInvalidMsg,
-				"maximum number of create pool claims is %d but received %d",
-				params.MaxCreatePoolsClaims, len(claims.CreatePools),
-			)
-		}
-
-		// max create operator
-		if uint64(len(claims.CreateOperators)) > params.MaxCreateOperatorClaims {
-			return ctx, sdkerrors.Wrapf(ErrInvalidMsg,
-				"maximum number of create operator claimss is %d but received %d characters",
-				params.MaxCreateOperatorClaims, len(claims.CreateOperators),
+				"maximum number of claims is %d but received %d",
+				params.MaxClaims, len(claims.Data),
 			)
 		}
 	}

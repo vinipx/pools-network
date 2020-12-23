@@ -3,6 +3,10 @@ package keeper
 import (
 	"fmt"
 
+	keeper2 "github.com/bloxapp/pools-network/x/poolsnetwork/keeper"
+
+	"github.com/cosmos/cosmos-sdk/x/staking/keeper"
+
 	types2 "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -18,20 +22,25 @@ type (
 		storeKey   sdk.StoreKey
 		memKey     sdk.StoreKey
 		paramstore types2.Subspace
+
+		StakingKeeper keeper.Keeper
+		PoolsKeeper   keeper2.Keeper
 	}
 )
 
-func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey, memKey sdk.StoreKey) *Keeper {
+func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey, memKey sdk.StoreKey, stakingKeeper keeper.Keeper, poolsKeeper keeper2.Keeper) *Keeper {
 	// set KeyTable if it has not already been set
 	if !paramstore.HasKeyTable() {
 		paramstore = paramstore.WithKeyTable(types.ParamKeyTable())
 	}
 
 	return &Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramstore: paramstore,
+		cdc:           cdc,
+		storeKey:      storeKey,
+		memKey:        memKey,
+		paramstore:    paramstore,
+		StakingKeeper: stakingKeeper,
+		PoolsKeeper:   poolsKeeper,
 	}
 }
 

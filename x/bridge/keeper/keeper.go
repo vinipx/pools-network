@@ -20,7 +20,6 @@ type (
 	Keeper struct {
 		cdc        codec.Marshaler
 		storeKey   sdk.StoreKey
-		memKey     sdk.StoreKey
 		paramstore types2.Subspace
 
 		StakingKeeper keeper.Keeper
@@ -28,16 +27,15 @@ type (
 	}
 )
 
-func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey, memKey sdk.StoreKey, stakingKeeper keeper.Keeper, poolsKeeper keeper2.Keeper) *Keeper {
+func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey sdk.StoreKey, stakingKeeper keeper.Keeper, poolsKeeper keeper2.Keeper) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramstore.HasKeyTable() {
 		paramstore = paramstore.WithKeyTable(types.ParamKeyTable())
 	}
 
-	return &Keeper{
+	return Keeper{
 		cdc:           cdc,
 		storeKey:      storeKey,
-		memKey:        memKey,
 		paramstore:    paramstore,
 		StakingKeeper: stakingKeeper,
 		PoolsKeeper:   poolsKeeper,

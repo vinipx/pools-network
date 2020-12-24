@@ -23,19 +23,20 @@ func (k Keeper) AddClaim(ctx sdk.Context, operator types3.Operator, contract typ
 }
 
 func (k Keeper) storeClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim *types2.ClaimData) error {
+	return nil
 }
 
 // Returns 0 if it's the operators first claim
-func (k Keeper) GetLastEthereumClaimNonce(ctx sdk.Context, operatorAddress *types.ConsensusAddress) types2.UInt64Nonce {
+func (k Keeper) GetLastEthereumClaimNonce(ctx sdk.Context, operatorAddress types.ConsensusAddress) types2.UInt64Nonce {
 	store := ctx.KVStore(k.storeKey)
-	bytes := store.Get(types2.GetOperatorLastClaimNonceKey(*operatorAddress))
+	bytes := store.Get(types2.GetOperatorLastClaimNonceKey(operatorAddress))
 	if len(bytes) == 0 {
 		return types2.NewUInt64Nonce(0)
 	}
 	return types2.UInt64NonceFromBytes(bytes)
 }
 
-func (k Keeper) SetLastEthereumClaimNonce(ctx sdk.Context, operatorAddress *types.ConsensusAddress, nonce types2.UInt64Nonce) {
+func (k Keeper) SetLastEthereumClaimNonce(ctx sdk.Context, operatorAddress types.ConsensusAddress, nonce types2.UInt64Nonce) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types2.GetOperatorLastClaimNonceKey(*operatorAddress), nonce.Bytes())
+	store.Set(types2.GetOperatorLastClaimNonceKey(operatorAddress), nonce.Bytes())
 }

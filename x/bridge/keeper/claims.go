@@ -5,13 +5,35 @@ import (
 	types2 "github.com/bloxapp/pools-network/x/bridge/types"
 	types3 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func (k Keeper) GetEthereumBridgeContract(ctx sdk.Context, address types.EthereumAddress) (contract types2.EthereumBridgeContact, found bool) {
-	return types2.EthereumBridgeContact{
-		ContractAddress: address,
-		ChainId:         1,
-	}, true
+func (k Keeper) GetEthereumBridgeContract(ctx sdk.Context, address types.EthereumAddress) (contract types2.EthereumBridgeContact, found bool, err error) {
+	store := ctx.KVStore(k.storeKey)
+	byts := store.Get(address[:])
+
+	if byts == nil || len(byts) == 0 {
+		return types2.EthereumBridgeContact{}, false, nil
+	}
+
+	// unmarshal
+	ret := types2.EthereumBridgeContact{}
+	err = ret.Unmarshal(byts)
+	if err != nil {
+		return types2.EthereumBridgeContact{}, false, sdkerrors.Wrap(err, "Could not unmarshal EthereumBridgeContact")
+	}
+
+	return ret, true, nil
+}
+
+func (k Keeper) SetEthereumBridgeContract(ctx sdk.Context, contract types2.EthereumBridgeContact) error {
+	store := ctx.KVStore(k.storeKey)
+	byts, err := contract.Marshal()
+	if err != nil {
+		return sdkerrors.Wrap(err, "Could not set ethereum contract address")
+	}
+	store.Set(contract.ContractAddress[:], byts)
+	return nil
 }
 
 func (k Keeper) AddClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim *types2.ClaimData) error {

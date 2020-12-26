@@ -27,15 +27,21 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 
 func handleMsgEthereumClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.MsgEthereumClaim) (*sdk.Result, error) {
 	// validate operator
-	operator, found := keeper.PoolsKeeper.GetOperator(ctx, msg.ConsensusAddress)
+	operator, found, err := keeper.PoolsKeeper.GetOperator(ctx, msg.ConsensusAddress)
 	if !found {
 		return nil, types.ErrOperatorNotFound
 	}
+	if err != nil {
+		return nil, err
+	}
 
 	// validate bridge contract
-	contract, found := keeper.GetEthereumBridgeContract(ctx, msg.ContractAddress)
+	contract, found, err := keeper.GetEthereumBridgeContract(ctx, msg.ContractAddress)
 	if !found {
 		return nil, types.ErrBridgeContractNotFound
+	}
+	if err != nil {
+		return nil, err
 	}
 	if contract.ChainId != msg.EthereumChainId {
 		return nil, types.ErrWrongEthereumChainId
@@ -55,4 +61,9 @@ func handleMsgEthereumClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.Ms
 			return nil, err
 		}
 	}
+	return &sdk.Result{
+		Data:   nil,
+		Log:    "",
+		Events: nil,
+	}, nil
 }

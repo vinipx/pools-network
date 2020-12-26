@@ -9,14 +9,17 @@ import (
 var _ sdk.Msg = &MsgEthereumClaim{}
 
 func NewMsgEthereumClaim(
+	nonce uint64,
 	chainId uint64,
 	contractAddress types.EthereumAddress,
-	pubKey types.ConsensusAddress,
+	consensusAddress types.ConsensusAddress,
 ) *MsgEthereumClaim {
 	return &MsgEthereumClaim{
-		EthereumChainId: chainId,
-		ContractAddress: contractAddress,
-		Data:            make([]*ClaimData, 0),
+		Nonce:            nonce,
+		EthereumChainId:  chainId,
+		ContractAddress:  contractAddress,
+		ConsensusAddress: consensusAddress,
+		Data:             make([]*ClaimData, 0),
 	}
 }
 

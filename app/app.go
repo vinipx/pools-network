@@ -312,6 +312,8 @@ func New(
 		app.GetSubspace(bridgetypes.ModuleName),
 		keys[bridgetypes.StoreKey],
 		keys[bridgetypes.MemStoreKey],
+		app.StakingKeeper,
+		app.poolsnetworkKeeper,
 	)
 
 	// NOTE: Any module instantiated in the module manager that is later modified

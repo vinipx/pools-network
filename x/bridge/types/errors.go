@@ -13,4 +13,5 @@ var (
 	ErrWrongEthereumChainId   = sdkerrors.Register(ModuleName, 1102, "Ethereum chain id is wrong")
 	ErrClaimDataInvalid       = sdkerrors.Register(ModuleName, 1103, "Delegate/ un-delegate claim data invalid")
 	ErrNonceInvalid           = sdkerrors.Register(ModuleName, 1104, "Nonce invalid")
+	ErrClaimExists            = sdkerrors.Register(ModuleName, 1105, "Claim already exists")
 )

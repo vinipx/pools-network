@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/hex"
+
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -39,6 +41,10 @@ func (address ConsensusAddress) MarshalTo(dAtA []byte) (int, error) {
 
 func (address ConsensusAddress) Validate() error {
 	return nil // TODO - should pass any validation?
+}
+
+func (address ConsensusAddress) Hex() string {
+	return hex.EncodeToString(address)
 }
 
 func (address *ConsensusAddress) Unmarshal(data []byte) error {

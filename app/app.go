@@ -4,6 +4,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/x/capability"
+
 	"github.com/cosmos/cosmos-sdk/codec/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -36,7 +38,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/cosmos-sdk/x/capability"
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -88,7 +89,6 @@ var (
 		auth.AppModuleBasic{},
 		genutil.AppModuleBasic{},
 		bank.AppModuleBasic{},
-		capability.AppModuleBasic{},
 		staking.AppModuleBasic{},
 		//mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
@@ -297,8 +297,10 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
-	app.poolsnetworkKeeper = *poolsnetworkkeeper.NewKeeper(
-		appCodec, keys[poolsnetworktypes.StoreKey], keys[poolsnetworktypes.MemStoreKey],
+	app.poolsnetworkKeeper = poolsnetworkkeeper.NewKeeper(
+		appCodec,
+		keys[poolsnetworktypes.StoreKey],
+		stakingKeeper,
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
@@ -307,12 +309,10 @@ func New(
 		keys[reportstypes.StoreKey],
 		keys[reportstypes.MemStoreKey],
 	)
-	app.bridgeKeeper = *bridgekeeper.NewKeeper(
+	app.bridgeKeeper = bridgekeeper.NewKeeper(
 		appCodec,
 		app.GetSubspace(bridgetypes.ModuleName),
 		keys[bridgetypes.StoreKey],
-		keys[bridgetypes.MemStoreKey],
-		app.StakingKeeper,
 		app.poolsnetworkKeeper,
 	)
 

@@ -3,6 +3,10 @@ package keeper
 import (
 	"testing"
 
+	"github.com/tendermint/tendermint/crypto/ed25519"
+
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/stretchr/testify/require"
 
 	shared "github.com/bloxapp/pools-network/shared/types"
@@ -12,22 +16,29 @@ import (
 func TestSetAndGetOperator(t *testing.T) {
 	keeper, ctx := CreateTestEnv(t)
 
-	err := keeper.SetOperator(ctx, types.Operator{
+	sk := ed25519.GenPrivKey()
+	pk := sk.PubKey()
+	encoded, err := github_com_cosmos_cosmos_sdk_types.Bech32ifyPubKey(github_com_cosmos_cosmos_sdk_types.Bech32PubKeyTypeConsPub, pk)
+	require.NoError(t, err)
+
+	err = keeper.SetOperator(ctx, types.Operator{
 		Id:               12,
 		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
-		ConsensusAddress: shared.ConsensusAddress{1, 2, 3, 4, 5},
+		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusPk:      encoded,
 		EthStake:         191,
 		CdtBalance:       2,
 	})
 	require.NoError(t, err)
 
 	// find valid
-	operator, found, err := keeper.GetOperator(ctx, shared.ConsensusAddress{1, 2, 3, 4, 5})
+	operator, found, err := keeper.GetOperator(ctx, shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
 	require.NoError(t, err)
 	require.True(t, found)
+	require.NotNil(t, operator.CosmosValidatorRef)
+	require.EqualValues(t, encoded, operator.CosmosValidatorRef.ConsensusPubkey)
 	require.EqualValues(t, 12, operator.Id)
 	require.EqualValues(t, shared.EthereumAddress{1, 2, 3, 4}, operator.EthereumAddress)
-	require.EqualValues(t, shared.ConsensusAddress{1, 2, 3, 4, 5}, operator.ConsensusAddress)
 	require.EqualValues(t, 191, operator.EthStake)
 	require.EqualValues(t, 2, operator.CdtBalance)
 

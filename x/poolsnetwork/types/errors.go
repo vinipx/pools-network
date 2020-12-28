@@ -8,5 +8,5 @@ import (
 
 // x/poolsnetwork module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrNoStakingValidatorForOperator = sdkerrors.Register(ModuleName, 1100, "No Staking Validator For Operator")
 )

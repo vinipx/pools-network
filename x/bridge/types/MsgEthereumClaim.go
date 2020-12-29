@@ -28,24 +28,24 @@ func (msg *MsgEthereumClaim) AddClaim(d *ClaimData) *MsgEthereumClaim {
 	return msg
 }
 
-func (msg *MsgEthereumClaim) Route() string {
+func (msg MsgEthereumClaim) Route() string {
 	return RouterKey
 }
 
-func (msg *MsgEthereumClaim) Type() string {
-	return "EthereumClaim"
+func (msg MsgEthereumClaim) Type() string {
+	return "MsgEthereumClaim"
 }
 
-func (msg *MsgEthereumClaim) GetSigners() []sdk.AccAddress {
+func (msg MsgEthereumClaim) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{sdk.AccAddress(msg.ConsensusAddress)}
 }
 
-func (msg *MsgEthereumClaim) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgEthereumClaim) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgEthereumClaim) ValidateBasic() error {
+func (msg MsgEthereumClaim) ValidateBasic() error {
 	for _, c := range msg.Data {
 		if c.TxHash == nil || len(c.TxHash) == 0 {
 			return sdkerrors.Wrap(ErrClaimDataInvalid, "TxHash is invalid")

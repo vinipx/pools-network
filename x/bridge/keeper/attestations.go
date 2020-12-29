@@ -11,8 +11,8 @@ func (k Keeper) processAttestation(ctx sdk.Context, contract *types2.ClaimAttest
 	return nil // TODO
 }
 
-func (k Keeper) attestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {
-	att, err := k.getAttestation(ctx, contract, claim)
+func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {
+	att, err := k.GetAttestation(ctx, contract, claim)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "could not get attestation")
 	}
@@ -38,13 +38,13 @@ func (k Keeper) attestClaim(ctx sdk.Context, operator types3.Operator, contract 
 		att.Finalized = true
 	}
 
-	if err := k.saveAttestation(ctx, att); err != nil {
+	if err := k.SaveAttestation(ctx, att); err != nil {
 		return nil, sdkerrors.Wrap(err, "could not save attestation")
 	}
 	return att, nil
 }
 
-func (k Keeper) saveAttestation(
+func (k Keeper) SaveAttestation(
 	ctx sdk.Context,
 	claimAttestation *types2.ClaimAttestation,
 ) error {
@@ -58,7 +58,7 @@ func (k Keeper) saveAttestation(
 	return nil
 }
 
-func (k Keeper) getAttestation(
+func (k Keeper) GetAttestation(
 	ctx sdk.Context,
 	contract types2.EthereumBridgeContact,
 	claim types2.ClaimData,

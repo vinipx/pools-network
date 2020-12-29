@@ -50,7 +50,7 @@ func (k Keeper) AddClaim(ctx sdk.Context, operator types3.Operator, contract typ
 	}
 
 	// add attestation and mark finalized if enough votes
-	att, err := k.attestClaim(ctx, operator, contract, *claim)
+	att, err := k.AttestClaim(ctx, operator, contract, *claim)
 	if err != nil {
 		return sdkerrors.Wrap(err, "could not attest claim")
 	}

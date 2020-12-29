@@ -164,10 +164,10 @@ type App struct {
 	//ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	//ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
-	poolsnetworkKeeper poolsnetworkkeeper.Keeper
+	PoolsKeeper poolsnetworkkeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
-	reportsKeeper reportskeeper.Keeper
-	bridgeKeeper  bridgekeeper.Keeper
+	ReportsKeeper reportskeeper.Keeper
+	BridgeKeeper  bridgekeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -297,23 +297,23 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
-	app.poolsnetworkKeeper = poolsnetworkkeeper.NewKeeper(
+	app.PoolsKeeper = poolsnetworkkeeper.NewKeeper(
 		appCodec,
 		keys[poolsnetworktypes.StoreKey],
 		stakingKeeper,
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
-	app.reportsKeeper = *reportskeeper.NewKeeper(
+	app.ReportsKeeper = *reportskeeper.NewKeeper(
 		appCodec,
 		keys[reportstypes.StoreKey],
 		keys[reportstypes.MemStoreKey],
 	)
-	app.bridgeKeeper = bridgekeeper.NewKeeper(
+	app.BridgeKeeper = bridgekeeper.NewKeeper(
 		appCodec,
 		app.GetSubspace(bridgetypes.ModuleName),
 		keys[bridgetypes.StoreKey],
-		app.poolsnetworkKeeper,
+		app.PoolsKeeper,
 	)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
@@ -339,10 +339,10 @@ func New(
 		//ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		//transferModule,
-		poolsnetwork.NewAppModule(appCodec, app.poolsnetworkKeeper),
+		poolsnetwork.NewAppModule(appCodec, app.PoolsKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
-		reports.NewAppModule(appCodec, app.reportsKeeper),
-		bridge.NewAppModule(appCodec, app.bridgeKeeper),
+		reports.NewAppModule(appCodec, app.ReportsKeeper),
+		bridge.NewAppModule(appCodec, app.BridgeKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that

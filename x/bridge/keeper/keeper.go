@@ -3,7 +3,8 @@ package keeper
 import (
 	"fmt"
 
-	keeper2 "github.com/bloxapp/pools-network/x/poolsnetwork/keeper"
+	types3 "github.com/bloxapp/pools-network/shared/types"
+	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 
 	types2 "github.com/cosmos/cosmos-sdk/x/params/types"
 
@@ -20,11 +21,18 @@ type (
 		storeKey   sdk.StoreKey
 		paramstore types2.Subspace
 
-		PoolsKeeper keeper2.Keeper
+		PoolsKeeper PoolKeeper
 	}
 )
 
-func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey sdk.StoreKey, poolsKeeper keeper2.Keeper) Keeper {
+// PoolKeeper contains all necessary interfaces for the pool keeper, created to prevenet cyclic import
+type PoolKeeper interface {
+	GetOperator(ctx sdk.Context, address types3.ConsensusAddress) (operator poolTypes.Operator, found bool, err error)
+	CreateOperator(ctx sdk.Context, operator poolTypes.Operator) error
+	GetLastTotalPower(ctx sdk.Context) uint64
+}
+
+func NewKeeper(cdc codec.Marshaler, paramstore types2.Subspace, storeKey sdk.StoreKey, poolsKeeper PoolKeeper) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramstore.HasKeyTable() {
 		paramstore = paramstore.WithKeyTable(types.ParamKeyTable())

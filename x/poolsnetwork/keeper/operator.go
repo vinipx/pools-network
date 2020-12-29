@@ -9,6 +9,23 @@ import (
 	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 )
 
+func (k Keeper) CreateOperator(ctx sdk.Context) {
+
+}
+
+func (k Keeper) UpdateOperator(ctx sdk.Context, operator poolTypes.Operator) {
+
+}
+
+func (k Keeper) DeleteOperator(ctx sdk.Context, address types.ConsensusAddress) {
+	// delete from pools module
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(address)
+
+	// delete from cosmos
+	k.StakingKeeper.RemoveValidator(ctx, sdk.ValAddress(address))
+}
+
 func (k Keeper) GetOperator(ctx sdk.Context, address types.ConsensusAddress) (operator poolTypes.Operator, found bool, err error) {
 	store := ctx.KVStore(k.storeKey)
 	byts := store.Get(address)
@@ -34,11 +51,14 @@ func (k Keeper) GetOperator(ctx sdk.Context, address types.ConsensusAddress) (op
 	return ret, true, nil
 }
 
+// SetOperator is responsible for saving the pools operator and it's reference cosmos validator.
+// This is an important relationship as an operator should be identified i a one-to-one relationship with a
+// cosmos validator for the consensus to work.
 func (k Keeper) SetOperator(ctx sdk.Context, operator poolTypes.Operator) error {
 	store := ctx.KVStore(k.storeKey)
 
 	revert := func() {
-		k.DeleteOperator(ctx, operator)
+		k.DeleteOperator(ctx, operator.ConsensusAddress)
 	}
 
 	cpy := operator.CopyWithoutValidatorRef()
@@ -60,11 +80,8 @@ func (k Keeper) SetOperator(ctx sdk.Context, operator poolTypes.Operator) error 
 	val := stakingTypes.NewValidator(sdk.ValAddress(operator.ConsensusAddress), pk, stakingTypes.Description{})
 
 	k.StakingKeeper.SetValidator(ctx, val)
+	k.StakingKeeper.SetValidatorByConsAddr(ctx, val)
+	k.StakingKeeper.SetValidatorByPowerIndex(ctx, val)
 
 	return nil
-}
-
-func (k Keeper) DeleteOperator(ctx sdk.Context, operator poolTypes.Operator) {
-	store := ctx.KVStore(k.storeKey)
-	store.Delete(operator.ConsensusAddress)
 }

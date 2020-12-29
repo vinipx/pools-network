@@ -13,6 +13,37 @@ import (
 	"github.com/bloxapp/pools-network/x/poolsnetwork/types"
 )
 
+func TestDeleteOperator(t *testing.T) {
+	keeper, ctx := CreateTestEnv(t)
+
+	sk := ed25519.GenPrivKey()
+	pk := sk.PubKey()
+	encoded, err := github_com_cosmos_cosmos_sdk_types.Bech32ifyPubKey(github_com_cosmos_cosmos_sdk_types.Bech32PubKeyTypeConsPub, pk)
+	require.NoError(t, err)
+
+	operator := types.Operator{
+		Id:               12,
+		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
+		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusPk:      encoded,
+		EthStake:         191,
+		CdtBalance:       2,
+	}
+	err = keeper.SetOperator(ctx, operator)
+	require.NoError(t, err)
+
+	// delete
+	keeper.DeleteOperator(ctx, shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+
+	// verify
+	_, found, err := keeper.GetOperator(ctx, operator.ConsensusAddress)
+	require.NoError(t, err)
+	require.False(t, found)
+
+	_, found = keeper.StakingKeeper.GetValidator(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}))
+	require.False(t, found)
+}
+
 func TestSetAndGetOperator(t *testing.T) {
 	keeper, ctx := CreateTestEnv(t)
 

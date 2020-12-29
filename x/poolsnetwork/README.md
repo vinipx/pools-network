@@ -4,3 +4,6 @@
 <br>
 
 # Pools module
+The pools module is managing all network wide messages like createing operators, delegation, create pools and more.
+
+ 

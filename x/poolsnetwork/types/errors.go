@@ -9,4 +9,5 @@ import (
 // x/poolsnetwork module sentinel errors
 var (
 	ErrNoStakingValidatorForOperator = sdkerrors.Register(ModuleName, 1100, "No Staking Validator For Operator")
+	ErrOperatorNotFound              = sdkerrors.Register(ModuleName, 1101, "No operator found")
 )

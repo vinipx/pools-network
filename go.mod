@@ -6,6 +6,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.40.0-rc0
 	github.com/etcd-io/bbolt v1.3.3 // indirect
 	github.com/ethereum/go-ethereum v1.9.25
+	github.com/go-kit/kit v0.10.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0

@@ -19,7 +19,7 @@ func (k Keeper) attestClaim(ctx sdk.Context, operator types3.Operator, contract 
 
 	if att == nil {
 		att = &types2.ClaimAttestation{
-			ClaimId:          types2.GetClaimAttestastionStoreKey(contract, claim),
+			ClaimId:          types2.GetClaimAttestationStoreKey(contract, claim),
 			ContractAddress:  contract.ContractAddress,
 			Votes:            make(map[string]bool),
 			AccumulatedPower: 0,

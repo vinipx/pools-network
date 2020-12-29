@@ -19,8 +19,7 @@ import (
 func setupEnv(t *testing.T) (keeper.Keeper, sdk.Context) {
 	keeper, ctx := keeper.CreateTestEnv(t)
 
-	err := keeper.PoolsKeeper.SetOperator(ctx, types3.Operator{
-		Id:               1,
+	err := keeper.PoolsKeeper.CreateOperator(ctx, types3.Operator{
 		EthereumAddress:  types2.EthereumAddress{1, 2, 3, 4},
 		ConsensusAddress: types2.ConsensusAddress{5, 6, 7, 8},
 		EthStake:         10,

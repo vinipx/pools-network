@@ -22,14 +22,13 @@ func TestDeleteOperator(t *testing.T) {
 	require.NoError(t, err)
 
 	operator := types.Operator{
-		Id:               12,
 		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
 		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		ConsensusPk:      encoded,
 		EthStake:         191,
 		CdtBalance:       2,
 	}
-	err = keeper.SetOperator(ctx, operator)
+	err = keeper.CreateOperator(ctx, operator)
 	require.NoError(t, err)
 
 	// delete
@@ -44,7 +43,7 @@ func TestDeleteOperator(t *testing.T) {
 	require.False(t, found)
 }
 
-func TestSetAndGetOperator(t *testing.T) {
+func TestCreateOperator(t *testing.T) {
 	keeper, ctx := CreateTestEnv(t)
 
 	sk := ed25519.GenPrivKey()
@@ -52,8 +51,7 @@ func TestSetAndGetOperator(t *testing.T) {
 	encoded, err := github_com_cosmos_cosmos_sdk_types.Bech32ifyPubKey(github_com_cosmos_cosmos_sdk_types.Bech32PubKeyTypeConsPub, pk)
 	require.NoError(t, err)
 
-	err = keeper.SetOperator(ctx, types.Operator{
-		Id:               12,
+	err = keeper.CreateOperator(ctx, types.Operator{
 		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
 		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		ConsensusPk:      encoded,
@@ -68,7 +66,6 @@ func TestSetAndGetOperator(t *testing.T) {
 	require.True(t, found)
 	require.NotNil(t, operator.CosmosValidatorRef)
 	require.EqualValues(t, encoded, operator.CosmosValidatorRef.ConsensusPubkey)
-	require.EqualValues(t, 12, operator.Id)
 	require.EqualValues(t, shared.EthereumAddress{1, 2, 3, 4}, operator.EthereumAddress)
 	require.EqualValues(t, 191, operator.EthStake)
 	require.EqualValues(t, 2, operator.CdtBalance)

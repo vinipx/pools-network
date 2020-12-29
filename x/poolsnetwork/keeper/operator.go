@@ -9,8 +9,35 @@ import (
 	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 )
 
-func (k Keeper) CreateOperator(ctx sdk.Context) {
+func (k Keeper) CreateOperator(ctx sdk.Context, operator poolTypes.Operator) error {
+	if err := k.setOperator(ctx, operator); err != nil {
+		return sdkerrors.Wrap(err, "could not set operator")
+	}
 
+	// get operator with ref
+	operRef, found, err := k.GetOperator(ctx, operator.ConsensusAddress)
+	if err != nil {
+		return sdkerrors.Wrap(err, "could not get operator with ref")
+	}
+	if !found {
+		return sdkerrors.Wrap(poolTypes.ErrOperatorNotFound, "")
+	}
+
+	// mint
+	coin := sdk.NewInt64Coin("stake", 2)
+	_, err = k.StakingKeeper.Delegate(
+		ctx,
+		sdk.AccAddress(operator.ConsensusAddress),
+		coin.Amount,
+		sdk.Unbonded,
+		*operRef.CosmosValidatorRef,
+		true,
+	)
+	if err != nil {
+		return sdkerrors.Wrap(err, "Could not self delegate to new operator")
+	}
+
+	return nil
 }
 
 func (k Keeper) UpdateOperator(ctx sdk.Context, operator poolTypes.Operator) {
@@ -54,7 +81,7 @@ func (k Keeper) GetOperator(ctx sdk.Context, address types.ConsensusAddress) (op
 // SetOperator is responsible for saving the pools operator and it's reference cosmos validator.
 // This is an important relationship as an operator should be identified i a one-to-one relationship with a
 // cosmos validator for the consensus to work.
-func (k Keeper) SetOperator(ctx sdk.Context, operator poolTypes.Operator) error {
+func (k Keeper) setOperator(ctx sdk.Context, operator poolTypes.Operator) error {
 	store := ctx.KVStore(k.storeKey)
 
 	revert := func() {

@@ -42,16 +42,14 @@ func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
 }
 
 func TestAddClaim(t *testing.T) {
+	_, encoded1 := randConsensusKey(t)
 	operator1 := types3.Operator{
 		Id:               0,
 		EthereumAddress:  types.EthereumAddress{0, 0, 0, 0},
-		ConsensusAddress: types.ConsensusAddress{5, 6, 7, 8},
+		ConsensusAddress: types.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusPk:      encoded1,
 	}
-	operator2 := types3.Operator{
-		Id:               0,
-		EthereumAddress:  types.EthereumAddress{1, 1, 1, 1},
-		ConsensusAddress: types.ConsensusAddress{6, 6, 6, 6},
-	}
+
 	contract := types2.EthereumBridgeContact{
 		ContractAddress: types.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
@@ -70,7 +68,7 @@ func TestAddClaim(t *testing.T) {
 				TxHash:             []byte{1, 2, 3, 4},
 				ClaimType:          types2.ClaimType_Delegate,
 				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{{5, 6, 7, 8}},
+				ConsensusAddresses: []types.ConsensusAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
 			},
 			operator:    operator1,
 			contract:    contract,
@@ -82,7 +80,7 @@ func TestAddClaim(t *testing.T) {
 				TxHash:             []byte{1, 2, 3, 4},
 				ClaimType:          types2.ClaimType_Delegate,
 				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{{5, 6, 7, 8}},
+				ConsensusAddresses: []types.ConsensusAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
 			},
 			operator:    operator1,
 			contract:    contract,
@@ -95,9 +93,7 @@ func TestAddClaim(t *testing.T) {
 	err := keeper.SetEthereumBridgeContract(ctx, contract)
 	require.NoError(t, err)
 
-	err = keeper.PoolsKeeper.SetOperator(ctx, operator1)
-	require.NoError(t, err)
-	err = keeper.PoolsKeeper.SetOperator(ctx, operator2)
+	err = keeper.PoolsKeeper.CreateOperator(ctx, operator1)
 	require.NoError(t, err)
 
 	for _, test := range tests {

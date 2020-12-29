@@ -1,9 +1,9 @@
 package poolsnetwork
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/bloxapp/pools-network/x/poolsnetwork/keeper"
 	"github.com/bloxapp/pools-network/x/poolsnetwork/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes the capability module's state from a provided genesis

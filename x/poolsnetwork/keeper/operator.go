@@ -24,7 +24,7 @@ func (k Keeper) CreateOperator(ctx sdk.Context, operator poolTypes.Operator) err
 	}
 
 	// mint
-	coin := sdk.NewInt64Coin("stake", 2)
+	coin := sdk.NewInt64Coin("stake", int64(operator.EthStake))
 	_, err = k.StakingKeeper.Delegate(
 		ctx,
 		sdk.AccAddress(operator.ConsensusAddress),
@@ -48,6 +48,15 @@ func (k Keeper) DeleteOperator(ctx sdk.Context, address types.ConsensusAddress) 
 	// delete from pools module
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(address)
+
+	shares, err := k.StakingKeeper.ValidateUnbondAmount(ctx, sdk.AccAddress(address), sdk.ValAddress(address), sdk.TokensFromConsensusPower(10))
+	if err != nil {
+
+	}
+	_, err = k.StakingKeeper.Undelegate(ctx, sdk.AccAddress(address), sdk.ValAddress(address), shares)
+	if err != nil {
+
+	}
 
 	// delete from cosmos
 	k.StakingKeeper.RemoveValidator(ctx, sdk.ValAddress(address))
@@ -109,6 +118,7 @@ func (k Keeper) setOperator(ctx sdk.Context, operator poolTypes.Operator) error 
 	k.StakingKeeper.SetValidator(ctx, val)
 	k.StakingKeeper.SetValidatorByConsAddr(ctx, val)
 	k.StakingKeeper.SetValidatorByPowerIndex(ctx, val)
+	k.StakingKeeper.AfterValidatorCreated(ctx, val.GetOperator())
 
 	return nil
 }

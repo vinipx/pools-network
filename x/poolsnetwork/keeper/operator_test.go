@@ -14,7 +14,7 @@ import (
 )
 
 func TestDeleteOperator(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, accounts := CreateTestEnv(t)
 
 	sk := ed25519.GenPrivKey()
 	pk := sk.PubKey()
@@ -23,7 +23,7 @@ func TestDeleteOperator(t *testing.T) {
 
 	operator := types.Operator{
 		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
-		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusAddress: shared.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded,
 		EthStake:         191,
 		CdtBalance:       2,
@@ -32,19 +32,19 @@ func TestDeleteOperator(t *testing.T) {
 	require.NoError(t, err)
 
 	// delete
-	keeper.DeleteOperator(ctx, shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+	keeper.DeleteOperator(ctx, shared.ConsensusAddress(accounts[0]))
 
 	// verify
 	_, found, err := keeper.GetOperator(ctx, operator.ConsensusAddress)
 	require.NoError(t, err)
 	require.False(t, found)
 
-	_, found = keeper.StakingKeeper.GetValidator(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}))
+	_, found = keeper.StakingKeeper.GetValidator(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(shared.ConsensusAddress(accounts[0])))
 	require.False(t, found)
 }
 
 func TestCreateOperator(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, accounts := CreateTestEnv(t)
 
 	sk := ed25519.GenPrivKey()
 	pk := sk.PubKey()
@@ -53,22 +53,30 @@ func TestCreateOperator(t *testing.T) {
 
 	err = keeper.CreateOperator(ctx, types.Operator{
 		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
-		ConsensusAddress: shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusAddress: shared.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded,
-		EthStake:         191,
+		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
 		CdtBalance:       2,
 	})
 	require.NoError(t, err)
 
 	// find valid
-	operator, found, err := keeper.GetOperator(ctx, shared.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+	operator, found, err := keeper.GetOperator(ctx, shared.ConsensusAddress(accounts[0]))
 	require.NoError(t, err)
 	require.True(t, found)
 	require.NotNil(t, operator.CosmosValidatorRef)
 	require.EqualValues(t, encoded, operator.CosmosValidatorRef.ConsensusPubkey)
 	require.EqualValues(t, shared.EthereumAddress{1, 2, 3, 4}, operator.EthereumAddress)
-	require.EqualValues(t, 191, operator.EthStake)
+	require.EqualValues(t, 10000000, operator.EthStake)
 	require.EqualValues(t, 2, operator.CdtBalance)
+
+	keeper.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+
+	// verify initial delegation
+	delegations := keeper.StakingKeeper.GetValidatorDelegations(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(shared.ConsensusAddress(accounts[0])))
+	require.Len(t, delegations, 1)
+	power := keeper.StakingKeeper.GetLastValidatorPower(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(shared.ConsensusAddress(accounts[0])))
+	require.EqualValues(t, int64(10), power)
 
 	// find invalid
 	_, found, err = keeper.GetOperator(ctx, shared.ConsensusAddress{1, 2, 3, 4, 6})

@@ -7,27 +7,41 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func (k Keeper) attestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) error {
+func (k Keeper) processAttestation(ctx sdk.Context, contract *types2.ClaimAttestation) error {
+	return nil // TODO
+}
+
+func (k Keeper) attestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {
 	att, err := k.getAttestation(ctx, contract, claim)
 	if err != nil {
-		return err
+		return nil, sdkerrors.Wrap(err, "could not get attestation")
 	}
 
 	if att == nil {
 		att = &types2.ClaimAttestation{
-			ClaimId:          types2.GetClaimAttestationStoreKey(contract, claim),
+			ClaimId:          types2.GetClaimAttestastionStoreKey(contract, claim),
+			ContractAddress:  contract.ContractAddress,
 			Votes:            make(map[string]bool),
 			AccumulatedPower: 0,
 			Finalized:        false,
 		}
 	}
 
+	// add attestation
 	if _, found := att.Votes[operator.ConsensusAddress.Hex()]; !found {
 		att.Votes[operator.ConsensusAddress.Hex()] = true
 		att.AccumulatedPower += operator.GetPower()
 	}
 
-	return k.saveAttestation(ctx, att)
+	// If 2/3 of the total staking power voted, mark as finalized
+	if att.AccumulatedPower*3 > k.PoolsKeeper.GetLastTotalPower(ctx)*2 {
+		att.Finalized = true
+	}
+
+	if err := k.saveAttestation(ctx, att); err != nil {
+		return nil, sdkerrors.Wrap(err, "could not save attestation")
+	}
+	return att, nil
 }
 
 func (k Keeper) saveAttestation(

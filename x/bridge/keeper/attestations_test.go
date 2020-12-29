@@ -21,6 +21,7 @@ func TestAttestClaim(t *testing.T) {
 	err := keeper.SetEthereumBridgeContract(ctx, contract)
 	require.NoError(t, err)
 
+	//
 	operator1 := types.Operator{
 		ConsensusAddress: sharedTypes.ConsensusAddress{1, 2, 3, 4},
 		EthStake:         100,

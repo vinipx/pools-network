@@ -130,13 +130,13 @@ func CreateTestEnv(t *testing.T) (Keeper, sdk.Context) {
 	poolsKeeper := poolsnetworkkeeper.NewKeeper(
 		cdc,
 		poolsKey,
+		stakingKeeper,
 	)
 
 	bridgeKeeper := NewKeeper(
 		cdc,
 		paramsKeeper.Subspace(bridgeTypes.ModuleName),
 		bridgeKey,
-		stakingKeeper,
 		poolsKeeper,
 	)
 

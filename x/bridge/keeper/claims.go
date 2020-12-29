@@ -49,14 +49,14 @@ func (k Keeper) AddClaim(ctx sdk.Context, operator types3.Operator, contract typ
 		return err
 	}
 
-	// add attestation
-	if err := k.attestClaim(ctx, operator, contract, *claim); err != nil {
+	// add attestation and mark finalized if enough votes
+	att, err := k.attestClaim(ctx, operator, contract, *claim)
+	if err != nil {
 		return sdkerrors.Wrap(err, "could not attest claim")
 	}
 
-	// check if attestation finalized
-
-	return nil
+	// if finalized, process
+	return k.processAttestation(ctx, att)
 }
 
 func (k Keeper) storeClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim *types2.ClaimData) error {

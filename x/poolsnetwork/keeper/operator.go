@@ -44,22 +44,28 @@ func (k Keeper) UpdateOperator(ctx sdk.Context, operator poolTypes.Operator) {
 
 }
 
-func (k Keeper) DeleteOperator(ctx sdk.Context, address types.ConsensusAddress) {
-	// delete from pools module
-	store := ctx.KVStore(k.storeKey)
-	store.Delete(address)
-
-	shares, err := k.StakingKeeper.ValidateUnbondAmount(ctx, sdk.AccAddress(address), sdk.ValAddress(address), sdk.TokensFromConsensusPower(10))
-	if err != nil {
-
-	}
-	_, err = k.StakingKeeper.Undelegate(ctx, sdk.AccAddress(address), sdk.ValAddress(address), shares)
-	if err != nil {
-
-	}
-
-	// delete from cosmos
-	k.StakingKeeper.RemoveValidator(ctx, sdk.ValAddress(address))
+func (k Keeper) DeleteOperator(ctx sdk.Context, address types.ConsensusAddress) error {
+	//	// delete validator
+	//	shares, err := k.StakingKeeper.ValidateUnbondAmount(
+	//		ctx,
+	//		sdk.AccAddress(address),
+	//		sdk.ValAddress(address),
+	//		sdk.NewIntFromUint64(10),
+	//	)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	_, err = k.StakingKeeper.Undelegate(ctx, sdk.AccAddress(address), sdk.ValAddress(address), shares)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	k.StakingKeeper.RemoveValidator(ctx, sdk.ValAddress(address))
+	//
+	//	// delete from pools module
+	//	store := ctx.KVStore(k.storeKey)
+	//	store.Delete(address)
+	//
+	return nil
 }
 
 func (k Keeper) GetOperator(ctx sdk.Context, address types.ConsensusAddress) (operator poolTypes.Operator, found bool, err error) {

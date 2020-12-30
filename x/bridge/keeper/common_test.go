@@ -9,10 +9,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func CreateTestEnv(t *testing.T) (keeper.Keeper, sdk.Context) {
+func CreateTestEnv(t *testing.T) (keeper.Keeper, sdk.Context, []sdk.AccAddress) {
 	t.Helper()
 
-	app, ctx := testing2.SetupAppForTesting(false)
+	app, ctx, accounts := testing2.SetupAppForTesting(false)
 
-	return app.BridgeKeeper, ctx
+	return app.BridgeKeeper, ctx, accounts
 }

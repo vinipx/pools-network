@@ -1,7 +1,9 @@
-package keeper
+package keeper_test
 
 import (
 	"testing"
+
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 
 	types3 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 
@@ -13,7 +15,7 @@ import (
 )
 
 func TestGetAndSetLastEthereumClaimNonce(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, _ := CreateTestEnv(t)
 	address := types.ConsensusAddress([]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
 	keeper.SetLastEthereumClaimNonce(ctx, address, 1)
 	res := keeper.GetLastEthereumClaimNonce(ctx, address)
@@ -21,7 +23,7 @@ func TestGetAndSetLastEthereumClaimNonce(t *testing.T) {
 }
 
 func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, _ := CreateTestEnv(t)
 	err := keeper.SetEthereumBridgeContract(ctx, types2.EthereumBridgeContact{
 		ContractAddress: types.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
@@ -42,12 +44,14 @@ func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
 }
 
 func TestAddClaim(t *testing.T) {
+	keeper, ctx, accounts := CreateTestEnv(t)
+
 	_, encoded1 := randConsensusKey(t)
 	operator1 := types3.Operator{
-		Id:               0,
 		EthereumAddress:  types.EthereumAddress{0, 0, 0, 0},
-		ConsensusAddress: types.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusAddress: types.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded1,
+		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
 	}
 
 	contract := types2.EthereumBridgeContact{
@@ -68,7 +72,7 @@ func TestAddClaim(t *testing.T) {
 				TxHash:             []byte{1, 2, 3, 4},
 				ClaimType:          types2.ClaimType_Delegate,
 				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+				ConsensusAddresses: []types.ConsensusAddress{types.ConsensusAddress(accounts[0])},
 			},
 			operator:    operator1,
 			contract:    contract,
@@ -80,7 +84,7 @@ func TestAddClaim(t *testing.T) {
 				TxHash:             []byte{1, 2, 3, 4},
 				ClaimType:          types2.ClaimType_Delegate,
 				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+				ConsensusAddresses: []types.ConsensusAddress{types.ConsensusAddress(accounts[0])},
 			},
 			operator:    operator1,
 			contract:    contract,
@@ -89,7 +93,6 @@ func TestAddClaim(t *testing.T) {
 	}
 
 	// setup env
-	keeper, ctx := CreateTestEnv(t)
 	err := keeper.SetEthereumBridgeContract(ctx, contract)
 	require.NoError(t, err)
 

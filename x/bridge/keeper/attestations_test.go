@@ -23,7 +23,7 @@ func randConsensusKey(t *testing.T) (*ed25519.PrivKey, string) {
 }
 
 func TestAttestClaim(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, accounts := CreateTestEnv(t)
 
 	// setup
 	contract := types2.EthereumBridgeContact{
@@ -36,18 +36,18 @@ func TestAttestClaim(t *testing.T) {
 	//
 	_, encoded1 := randConsensusKey(t)
 	operator1 := types.Operator{
-		ConsensusAddress: sharedTypes.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		ConsensusAddress: sharedTypes.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded1,
-		EthStake:         100,
+		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
 	}
 	err = keeper.PoolsKeeper.CreateOperator(ctx, operator1)
 	require.NoError(t, err)
 
 	_, encoded2 := randConsensusKey(t)
 	operator2 := types.Operator{
-		ConsensusAddress: sharedTypes.ConsensusAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+		ConsensusAddress: sharedTypes.ConsensusAddress(accounts[1]),
 		ConsensusPk:      encoded2,
-		EthStake:         200,
+		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(20).Uint64(),
 	}
 	err = keeper.PoolsKeeper.CreateOperator(ctx, operator2)
 	require.NoError(t, err)
@@ -68,15 +68,15 @@ func TestAttestClaim(t *testing.T) {
 		[]byte{0x1, 0x2, 0x3, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x5f, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e},
 		att.ClaimId,
 	)
-	require.EqualValues(t, uint64(300), att.AccumulatedPower)
-	require.Contains(t, att.Votes, sharedTypes.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}.Hex())
-	require.True(t, att.Votes[sharedTypes.ConsensusAddress{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}.Hex()])
-	require.Contains(t, att.Votes, sharedTypes.ConsensusAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}.Hex())
-	require.True(t, att.Votes[sharedTypes.ConsensusAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}.Hex()])
+	require.EqualValues(t, uint64(30000000), att.AccumulatedPower)
+	require.Contains(t, att.Votes, sharedTypes.ConsensusAddress(accounts[0]).Hex())
+	require.True(t, att.Votes[sharedTypes.ConsensusAddress(accounts[0]).Hex()])
+	require.Contains(t, att.Votes, sharedTypes.ConsensusAddress(accounts[1]).Hex())
+	require.True(t, att.Votes[sharedTypes.ConsensusAddress(accounts[1]).Hex()])
 }
 
 func TestGetAndSetClaimAttestation(t *testing.T) {
-	keeper, ctx := CreateTestEnv(t)
+	keeper, ctx, _ := CreateTestEnv(t)
 
 	// setup
 	contract := types2.EthereumBridgeContact{

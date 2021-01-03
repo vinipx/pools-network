@@ -3,6 +3,8 @@ package types
 import (
 	"testing"
 
+	sharedTypes "github.com/bloxapp/pools-network/shared/types"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -10,4 +12,19 @@ func TestGetOperatorLastClaimNonceKey(t *testing.T) {
 	k := GetOperatorLastClaimNonceKey([]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
 	expected := []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	require.EqualValues(t, expected, k)
+}
+
+func TestGetClaimAttestationStoreKey(t *testing.T) {
+	contract := EthereumBridgeContact{
+		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
+		ChainId:         2,
+	}
+	claim := ClaimData{
+		TxHash:     []byte{1, 1, 1, 1},
+		ClaimNonce: 1,
+	}
+	key := GetClaimAttestationStoreKey(contract, claim)
+	require.EqualValues(t, []byte{
+		0x1, 0x2, 0x3, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x5f, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	}, key)
 }

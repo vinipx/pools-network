@@ -57,7 +57,7 @@ func HandleMsgEthereumClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.Ms
 	// add claims
 	for _, c := range msg.Data {
 		// TODO - check slashing condition: same claim in different nonce
-		if err := keeper.AddClaim(ctx, operator, contract, c); err != nil {
+		if err := keeper.ProcessClaim(ctx, operator, contract, c); err != nil {
 			return nil, err
 		}
 	}

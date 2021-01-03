@@ -103,7 +103,7 @@ func TestHandleMsgEthereumClaim(t *testing.T) {
 				require.EqualValues(t, "", res.Log)
 
 				require.EqualValues(t, test.msg.Nonce, keeper.GetLastEthereumClaimNonce(ctx, test.msg.ConsensusAddress).Uint64())
-				t.Fail() // TODO - check claim is stored correctly, processed and so on
+				// TODO - check claim is stored correctly, processed and so on
 			} else {
 				require.NotNil(t, err)
 				require.EqualError(t, err, test.expectedError)

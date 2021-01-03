@@ -31,19 +31,19 @@ func (p paramsProvider) GetParams(ctx sdk.Context) types.Params {
 	return p.p
 }
 
-func validClaim() *types.ClaimData {
-	return &types.ClaimData{
+func validClaim() types.ClaimData {
+	return types.ClaimData{
 		TxHash:             []byte{1, 2, 3, 4},
 		ClaimNonce:         1,
 		ClaimType:          types.ClaimType_Delegate,
-		EthereumAddresses:  []types2.EthereumAddress{{1, 2, 3, 4}},
+		EthereumAddresses:  []types2.EthereumAddress{{1, 2, 3, 4}, {1, 2, 3, 4}},
 		ConsensusAddresses: []types2.ConsensusAddress{{1, 2, 3, 4}},
-		Values:             []uint64{1, 2, 3, 4},
+		Values:             []uint64{1},
 	}
 }
 
-func populateWithClaims(claim *types.ClaimData, length uint64) []*types.ClaimData {
-	ret := make([]*types.ClaimData, length)
+func populateWithClaims(claim types.ClaimData, length uint64) []types.ClaimData {
+	ret := make([]types.ClaimData, length)
 	for i := uint64(0); i < length; i++ {
 		ret[i] = claim
 	}
@@ -80,7 +80,7 @@ func TestNewMsgEthereumClaimAnteHandler(t *testing.T) {
 		{
 			name: "invalid claim data",
 			msgEthereumClaim: &types.MsgEthereumClaim{
-				Data: populateWithClaims(&types.ClaimData{
+				Data: populateWithClaims(types.ClaimData{
 					TxHash:             []byte{},
 					ClaimNonce:         1,
 					ClaimType:          types.ClaimType_Delegate,
@@ -89,7 +89,7 @@ func TestNewMsgEthereumClaimAnteHandler(t *testing.T) {
 					Values:             []uint64{1, 2, 3, 4},
 				}, 1),
 			},
-			errStr: "Tx hash is empty: Claim data invalid",
+			errStr: "Tx hash is invalid: Claim data invalid",
 		},
 	}
 

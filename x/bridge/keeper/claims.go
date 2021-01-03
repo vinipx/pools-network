@@ -36,51 +36,15 @@ func (k Keeper) SetEthereumBridgeContract(ctx sdk.Context, contract types2.Ether
 	return nil
 }
 
-func (k Keeper) AddClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim *types2.ClaimData) error {
-	// add claim to db
-	_, found, err := k.getClaim(ctx, operator, contract, claim.TxHash)
-	if err != nil {
-		return err
-	}
-	if found {
-		return types2.ErrClaimExists
-	}
-	if err := k.storeClaim(ctx, operator, contract, claim); err != nil {
-		return err
-	}
-
+func (k Keeper) ProcessClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) error {
 	// add attestation and mark finalized if enough votes
-	att, err := k.AttestClaim(ctx, operator, contract, *claim)
+	att, err := k.AttestClaim(ctx, operator, contract, claim)
 	if err != nil {
 		return sdkerrors.Wrap(err, "could not attest claim")
 	}
 
 	// if finalized, process
 	return k.processAttestation(ctx, att)
-}
-
-func (k Keeper) storeClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim *types2.ClaimData) error {
-	store := ctx.KVStore(k.storeKey)
-	byts, err := claim.Marshal()
-	if err != nil {
-		return sdkerrors.Wrap(err, "Could not store claim")
-	}
-	store.Set(types2.GetClaimStoreKey(contract, operator.ConsensusAddress, *claim), byts)
-	return nil
-}
-
-func (k Keeper) getClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claimTxHash []byte) (claim *types2.ClaimData, found bool, err error) {
-	store := ctx.KVStore(k.storeKey)
-	byts := store.Get(types2.GetClaimStoreKey(contract, operator.ConsensusAddress, types2.ClaimData{TxHash: claimTxHash}))
-	if byts == nil || len(byts) == 0 {
-		return nil, false, nil
-	}
-
-	ret := &types2.ClaimData{}
-	if err := ret.Unmarshal(byts); err != nil {
-		return nil, false, err
-	}
-	return ret, true, nil
 }
 
 // Returns 0 if it's the operators first claim

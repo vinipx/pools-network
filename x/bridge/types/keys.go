@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/binary"
+
 	"github.com/bloxapp/pools-network/shared/types"
 )
 
@@ -29,19 +31,17 @@ func GetOperatorLastClaimNonceKey(operator types.ConsensusAddress) []byte {
 	return append(OperatorLastClaimNonce, operator...)
 }
 
-// Important - each tx hash can only have one claim
-func GetClaimStoreKey(contract EthereumBridgeContact, address types.ConsensusAddress, claim ClaimData) []byte {
-	ret := contract.ContractAddress[:]
-	ret = append(ret, address...)
-	ret = append(ret, claim.TxHash...)
-	ret = append(ret, []byte("_claim")...)
-	return ret
-}
-
-// Important - each tx hash can only have one claim
 func GetClaimAttestationStoreKey(contract EthereumBridgeContact, claim ClaimData) []byte {
+	nonceByts := make([]byte, 8)
+	binary.LittleEndian.PutUint64(nonceByts, claim.ClaimNonce)
+
+	chainIdByts := make([]byte, 8)
+	binary.LittleEndian.PutUint64(chainIdByts, contract.ChainId)
+
 	ret := contract.ContractAddress[:]
+	ret = append(ret, chainIdByts...)
 	ret = append(ret, claim.TxHash...)
+	ret = append(ret, nonceByts...)
 	ret = append(ret, []byte("_claim_attestation")...)
 	return ret
 }

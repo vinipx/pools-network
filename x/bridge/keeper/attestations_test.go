@@ -37,9 +37,10 @@ func TestAttestClaim(t *testing.T) {
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0},
 			claim: types2.ClaimData{
-				TxHash: []byte{1, 1, 1, 1},
+				TxHash:     []byte{1, 1, 1, 1},
+				ClaimNonce: 1,
 			},
-			finalPower: github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
+			finalPower: 10,
 			finalized:  false,
 		},
 		{
@@ -47,9 +48,10 @@ func TestAttestClaim(t *testing.T) {
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0, 1},
 			claim: types2.ClaimData{
-				TxHash: []byte{1, 1, 1, 1},
+				TxHash:     []byte{1, 1, 1, 1},
+				ClaimNonce: 1,
 			},
-			finalPower: github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(20).Uint64(),
+			finalPower: 20,
 			finalized:  false,
 		},
 		{
@@ -57,9 +59,10 @@ func TestAttestClaim(t *testing.T) {
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0, 1, 2},
 			claim: types2.ClaimData{
-				TxHash: []byte{1, 1, 1, 1},
+				TxHash:     []byte{1, 1, 1, 1},
+				ClaimNonce: 1,
 			},
-			finalPower: github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(30).Uint64(),
+			finalPower: 30,
 			finalized:  true,
 		},
 	}
@@ -109,8 +112,8 @@ func TestAttestClaim(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, found)
 				require.EqualValues(t,
-					[]byte{0x1, 0x2, 0x3, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x5f, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e},
-					attestation.ClaimId,
+					[]byte{0x1, 0x1, 0x1, 0x1},
+					attestation.Claim.TxHash,
 				)
 				require.Contains(t, attestation.Votes, consensusAddress.Hex())
 				require.True(t, attestation.Votes[consensusAddress.Hex()])
@@ -143,7 +146,8 @@ func TestGetAndSetClaimAttestation(t *testing.T) {
 
 	// save and get
 	err = keeper.SaveAttestation(ctx, &types2.ClaimAttestation{
-		ClaimId:          types2.GetClaimAttestationStoreKey(contract, claim),
+		Claim:            claim,
+		Contract:         contract,
 		AccumulatedPower: 10,
 	})
 	require.NoError(t, err)
@@ -152,7 +156,7 @@ func TestGetAndSetClaimAttestation(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, found)
 	require.EqualValues(t,
-		[]byte{0x1, 0x2, 0x3, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x5f, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x5f, 0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e},
-		att.ClaimId,
+		[]byte{0x1, 0x1, 0x1, 0x1},
+		att.Claim.TxHash,
 	)
 }

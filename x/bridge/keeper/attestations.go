@@ -7,7 +7,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func (k Keeper) processAttestation(ctx sdk.Context, contract *types2.ClaimAttestation) error {
+func (k Keeper) processAttestation(ctx sdk.Context, attestation *types2.ClaimAttestation) error {
+	//k.getClaim()
 	return nil // TODO
 }
 
@@ -19,8 +20,8 @@ func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract 
 
 	if !found {
 		att = &types2.ClaimAttestation{
-			ClaimId:          types2.GetClaimAttestationStoreKey(contract, claim),
-			ContractAddress:  contract.ContractAddress,
+			Claim:            claim,
+			Contract:         contract,
 			Votes:            make(map[string]bool),
 			AccumulatedPower: 0,
 			Finalized:        false,
@@ -34,7 +35,8 @@ func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract 
 	}
 
 	// If 2/3 of the total staking power voted, mark as finalized
-	if att.AccumulatedPower*3 >= k.PoolsKeeper.GetLastTotalPower(ctx)*2 {
+	thresholdPower := k.PoolsKeeper.GetLastTotalPower(ctx) * 2 / 3
+	if att.AccumulatedPower >= thresholdPower {
 		att.Finalized = true
 	}
 
@@ -54,7 +56,7 @@ func (k Keeper) SaveAttestation(
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	store.Set(claimAttestation.ClaimId, byts)
+	store.Set(types2.GetClaimAttestationStoreKey(claimAttestation.Contract, claimAttestation.Claim), byts)
 	return nil
 }
 

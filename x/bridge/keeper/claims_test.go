@@ -61,14 +61,14 @@ func TestAddClaim(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		claim       *types2.ClaimData
+		claim       types2.ClaimData
 		operator    types3.Operator
 		contract    types2.EthereumBridgeContact
 		expectedErr string
 	}{
 		{
 			name: "valid",
-			claim: &types2.ClaimData{
+			claim: types2.ClaimData{
 				TxHash:             []byte{1, 2, 3, 4},
 				ClaimType:          types2.ClaimType_Delegate,
 				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
@@ -77,18 +77,6 @@ func TestAddClaim(t *testing.T) {
 			operator:    operator1,
 			contract:    contract,
 			expectedErr: "",
-		},
-		{
-			name: "duplicate claim, should error",
-			claim: &types2.ClaimData{
-				TxHash:             []byte{1, 2, 3, 4},
-				ClaimType:          types2.ClaimType_Delegate,
-				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{types.ConsensusAddress(accounts[0])},
-			},
-			operator:    operator1,
-			contract:    contract,
-			expectedErr: "Claim already exists",
 		},
 	}
 
@@ -101,7 +89,7 @@ func TestAddClaim(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := keeper.AddClaim(
+			err := keeper.ProcessClaim(
 				ctx,
 				test.operator,
 				test.contract,

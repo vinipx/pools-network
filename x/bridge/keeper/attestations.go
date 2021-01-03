@@ -12,12 +12,12 @@ func (k Keeper) processAttestation(ctx sdk.Context, contract *types2.ClaimAttest
 }
 
 func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {
-	att, err := k.GetAttestation(ctx, contract, claim)
+	att, found, err := k.GetAttestation(ctx, contract, claim)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "could not get attestation")
 	}
 
-	if att == nil {
+	if !found {
 		att = &types2.ClaimAttestation{
 			ClaimId:          types2.GetClaimAttestationStoreKey(contract, claim),
 			ContractAddress:  contract.ContractAddress,
@@ -34,7 +34,7 @@ func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract 
 	}
 
 	// If 2/3 of the total staking power voted, mark as finalized
-	if att.AccumulatedPower*3 > k.PoolsKeeper.GetLastTotalPower(ctx)*2 {
+	if att.AccumulatedPower*3 >= k.PoolsKeeper.GetLastTotalPower(ctx)*2 {
 		att.Finalized = true
 	}
 
@@ -62,17 +62,17 @@ func (k Keeper) GetAttestation(
 	ctx sdk.Context,
 	contract types2.EthereumBridgeContact,
 	claim types2.ClaimData,
-) (*types2.ClaimAttestation, error) {
+) (*types2.ClaimAttestation, bool, error) {
 	store := ctx.KVStore(k.storeKey)
 	byts := store.Get(types2.GetClaimAttestationStoreKey(contract, claim))
 	if byts == nil || len(byts) == 0 {
-		return nil, nil
+		return nil, false, nil
 	}
 
 	// unmarshal
 	ret := &types2.ClaimAttestation{}
 	if err := ret.Unmarshal(byts); err != nil {
-		return nil, err
+		return nil, true, err
 	}
-	return ret, nil
+	return ret, true, nil
 }

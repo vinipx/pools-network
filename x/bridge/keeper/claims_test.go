@@ -46,7 +46,7 @@ func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
 func TestAddClaim(t *testing.T) {
 	keeper, ctx, accounts := CreateTestEnv(t)
 
-	_, encoded1 := randConsensusKey(t)
+	encoded1 := randConsensusKey(t)
 	operator1 := types3.Operator{
 		EthereumAddress:  types.EthereumAddress{0, 0, 0, 0},
 		ConsensusAddress: types.ConsensusAddress(accounts[0]),

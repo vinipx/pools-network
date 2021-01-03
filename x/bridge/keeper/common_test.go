@@ -11,7 +11,6 @@ import (
 
 func CreateTestEnv(t *testing.T) (keeper.Keeper, sdk.Context, []sdk.AccAddress) {
 	t.Helper()
-
 	app, ctx, accounts := testing2.SetupAppForTesting(false)
 
 	return app.BridgeKeeper, ctx, accounts

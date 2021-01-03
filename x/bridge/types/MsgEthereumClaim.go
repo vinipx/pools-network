@@ -96,12 +96,10 @@ func (c ClaimData) ValidateBasic() error {
 			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Consensus addresses invalid")
 		}
 		if len(c.Values) != 2 {
-			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: values length must be 2")
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: values length must be 2")
 		}
 	default:
-		if len(c.ConsensusAddresses) == 0 && len(c.EthereumAddresses) == 0 && len(c.Values) == 0 {
-			return sdkerrors.Wrap(ErrClaimDataInvalid, "Claim values are nil")
-		}
+		return sdkerrors.Wrap(ErrClaimDataInvalid, "Unknown claim type")
 	}
 
 	return nil

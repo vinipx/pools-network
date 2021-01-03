@@ -39,6 +39,13 @@ func (sud MsgEthereumClaimAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, si
 				params.MaxClaims, len(claims.Data),
 			)
 		}
+
+		// validate claims
+		for _, c := range claims.Data {
+			if err := c.ValidateBasic(); err != nil {
+				return ctx, err
+			}
+		}
 	}
 
 	return next(ctx, tx, simulate)

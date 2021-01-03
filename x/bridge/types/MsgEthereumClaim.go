@@ -19,11 +19,11 @@ func NewMsgEthereumClaim(
 		EthereumChainId:  chainId,
 		ContractAddress:  contractAddress,
 		ConsensusAddress: consensusAddress,
-		Data:             make([]*ClaimData, 0),
+		Data:             make([]ClaimData, 0),
 	}
 }
 
-func (msg *MsgEthereumClaim) AddClaim(d *ClaimData) *MsgEthereumClaim {
+func (msg *MsgEthereumClaim) AddClaim(d ClaimData) *MsgEthereumClaim {
 	msg.Data = append(msg.Data, d)
 	return msg
 }
@@ -46,38 +46,63 @@ func (msg MsgEthereumClaim) GetSignBytes() []byte {
 }
 
 func (msg MsgEthereumClaim) ValidateBasic() error {
-	for _, c := range msg.Data {
-		if c.TxHash == nil || len(c.TxHash) == 0 {
-			return sdkerrors.Wrap(ErrClaimDataInvalid, "TxHash is invalid")
-		}
+	if len(msg.ContractAddress) == 0 {
+		return sdkerrors.Wrap(ErrClaimDataInvalid, "Contract address is invalid")
+	}
+	if len(msg.ConsensusAddress) == 0 {
+		return sdkerrors.Wrap(ErrClaimDataInvalid, "Consensus address is invalid")
+	}
 
-		switch c.ClaimType {
-		case ClaimType_Delegate, ClaimType_Undelegate:
-			if len(c.EthereumAddresses) != 2 {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses length must be 2")
-			}
-			if err := c.EthereumAddresses[0].Validate(); err != nil {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses invalid")
-			}
-			if err := c.EthereumAddresses[1].Validate(); err != nil {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses invalid")
-			}
-		case ClaimType_CreatePool:
-			continue
-		case ClaimType_CreateOperator:
-			if len(c.EthereumAddresses) != 1 {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Ethereum addresses length must be 1")
-			}
-			if err := c.EthereumAddresses[0].Validate(); err != nil {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Ethereum addresses invalid")
-			}
-			if len(c.ConsensusAddresses) != 1 {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Consensus addresses length must be 1")
-			}
-			if err := c.ConsensusAddresses[0].Validate(); err != nil {
-				return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Consensus addresses invalid")
-			}
+	for _, c := range msg.Data {
+		if err := c.ValidateBasic(); err != nil {
+			return err
 		}
 	}
+	return nil
+}
+
+func (c ClaimData) ValidateBasic() error {
+	if c.TxHash == nil || len(c.TxHash) == 0 {
+		return sdkerrors.Wrap(ErrClaimDataInvalid, "Tx hash is invalid")
+	}
+
+	switch c.ClaimType {
+	case ClaimType_Delegate, ClaimType_Undelegate:
+		if len(c.EthereumAddresses) != 2 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses length must be 2")
+		}
+		if err := c.EthereumAddresses[0].Validate(); err != nil {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses invalid")
+		}
+		if err := c.EthereumAddresses[1].Validate(); err != nil {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: Ethereum addresses invalid")
+		}
+		if len(c.Values) != 1 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: values length must be 1")
+		}
+	case ClaimType_CreatePool:
+		return nil // TODO
+	case ClaimType_CreateOperator:
+		if len(c.EthereumAddresses) != 1 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Ethereum addresses length must be 1")
+		}
+		if err := c.EthereumAddresses[0].Validate(); err != nil {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Ethereum addresses invalid")
+		}
+		if len(c.ConsensusAddresses) != 1 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Consensus addresses length must be 1")
+		}
+		if err := c.ConsensusAddresses[0].Validate(); err != nil {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "CreateOperator: Consensus addresses invalid")
+		}
+		if len(c.Values) != 2 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Delegate/ Undelegate: values length must be 2")
+		}
+	default:
+		if len(c.ConsensusAddresses) == 0 && len(c.EthereumAddresses) == 0 && len(c.Values) == 0 {
+			return sdkerrors.Wrap(ErrClaimDataInvalid, "Claim values are nil")
+		}
+	}
+
 	return nil
 }

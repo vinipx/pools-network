@@ -17,7 +17,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		// this line is used by starport scaffolding # 1
 		case *types.MsgEthereumClaim:
-			return handleMsgEthereumClaim(ctx, k, msg)
+			return HandleMsgEthereumClaim(ctx, k, msg)
 		default:
 			errMsg := fmt.Sprintf("unrecognized %s message type: %T", types.ModuleName, msg)
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
@@ -25,7 +25,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-func handleMsgEthereumClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.MsgEthereumClaim) (*sdk.Result, error) {
+func HandleMsgEthereumClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.MsgEthereumClaim) (*sdk.Result, error) {
 	// validate operator
 	operator, found, err := keeper.PoolsKeeper.GetOperator(ctx, msg.ConsensusAddress)
 	if !found {

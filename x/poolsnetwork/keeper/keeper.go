@@ -3,7 +3,11 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	bankKeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+
+	authKeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+
+	stakingKeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -17,15 +21,25 @@ type (
 		cdc      codec.Marshaler
 		storeKey sdk.StoreKey
 
-		StakingKeeper keeper.Keeper
+		StakingKeeper stakingKeeper.Keeper
+		AccountKeeper authKeeper.AccountKeeper
+		BankKeeper    bankKeeper.Keeper
 	}
 )
 
-func NewKeeper(cdc codec.Marshaler, storeKey sdk.StoreKey, stakingKeeper keeper.Keeper) Keeper {
+func NewKeeper(
+	cdc codec.Marshaler,
+	storeKey sdk.StoreKey,
+	stakingKeeper stakingKeeper.Keeper,
+	accountKeeper authKeeper.AccountKeeper,
+	bankingKeeper bankKeeper.Keeper,
+) Keeper {
 	return Keeper{
 		cdc:           cdc,
 		storeKey:      storeKey,
 		StakingKeeper: stakingKeeper,
+		AccountKeeper: accountKeeper,
+		BankKeeper:    bankingKeeper,
 	}
 }
 

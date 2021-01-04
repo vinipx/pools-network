@@ -24,7 +24,8 @@ func (k Keeper) CreateOperator(ctx sdk.Context, operator poolTypes.Operator) err
 	}
 
 	// mint
-	coin := sdk.NewInt64Coin("stake", int64(operator.EthStake))
+	denom := k.StakingKeeper.BondDenom(ctx)
+	coin := sdk.NewInt64Coin(denom, int64(operator.EthStake))
 	_, err = k.StakingKeeper.Delegate(
 		ctx,
 		sdk.AccAddress(operator.ConsensusAddress),

@@ -23,17 +23,8 @@ func (k Keeper) CreateOperator(ctx sdk.Context, operator poolTypes.Operator) err
 		return sdkerrors.Wrap(poolTypes.ErrOperatorNotFound, "")
 	}
 
-	// mint
-	denom := k.StakingKeeper.BondDenom(ctx)
-	coin := sdk.NewInt64Coin(denom, int64(operator.EthStake))
-	_, err = k.StakingKeeper.Delegate(
-		ctx,
-		sdk.AccAddress(operator.ConsensusAddress),
-		coin.Amount,
-		sdk.Unbonded,
-		*operRef.CosmosValidatorRef,
-		true,
-	)
+	// self delegate
+	err = k.Delegate(ctx, sdk.AccAddress(operator.ConsensusAddress), operRef, sdk.NewIntFromUint64(operator.EthStake))
 	if err != nil {
 		return sdkerrors.Wrap(err, "Could not self delegate to new operator")
 	}

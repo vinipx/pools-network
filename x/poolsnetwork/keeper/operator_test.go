@@ -86,6 +86,16 @@ func TestCreateOperator(t *testing.T) {
 	_, found, err = keeper.GetOperator(ctx, shared.ConsensusAddress{1, 2, 3, 4, 6})
 	require.NoError(t, err)
 	require.False(t, found)
+
+	// create validator with 0 self stake
+	err = keeper.CreateOperator(ctx, types.Operator{
+		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
+		ConsensusAddress: shared.ConsensusAddress(accounts[1]),
+		ConsensusPk:      encoded,
+		EthStake:         0,
+		CdtBalance:       2,
+	})
+	require.NoError(t, err)
 }
 
 func TestGetOperatorByEthereumAddress(t *testing.T) {

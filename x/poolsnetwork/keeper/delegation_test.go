@@ -39,3 +39,8 @@ func TestCreateDelegator(t *testing.T) {
 		})
 	}
 }
+
+func TestDelegate(t *testing.T) {
+	// the delegate funtion is part of the create operator function, we test it's functionality there
+	TestCreateDelegator(t)
+}

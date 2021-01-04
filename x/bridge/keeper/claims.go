@@ -44,7 +44,7 @@ func (k Keeper) ProcessClaim(ctx sdk.Context, operator types3.Operator, contract
 	}
 
 	// if finalized, process
-	return k.processAttestation(ctx, att)
+	return k.ProcessAttestation(ctx, att)
 }
 
 // Returns 0 if it's the operators first claim

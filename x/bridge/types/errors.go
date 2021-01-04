@@ -14,4 +14,5 @@ var (
 	ErrClaimDataInvalid       = sdkerrors.Register(ModuleName, 1103, "Claim data invalid")
 	ErrNonceInvalid           = sdkerrors.Register(ModuleName, 1104, "Nonce invalid")
 	ErrClaimExists            = sdkerrors.Register(ModuleName, 1105, "Claim already exists")
+	ErrUnsupportedClaim       = sdkerrors.Register(ModuleName, 1106, "Unsupported claim")
 )

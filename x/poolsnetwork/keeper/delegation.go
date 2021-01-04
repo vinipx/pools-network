@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"github.com/bloxapp/pools-network/shared/types"
+	types4 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	types3 "github.com/cosmos/cosmos-sdk/x/auth/types"
 	types2 "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
@@ -30,8 +31,20 @@ func (k Keeper) GetDelegator(ctx sdk.Context, address sdk.AccAddress) (types3.Ac
 	return acc, balance.Amount.Uint64()
 }
 
-func (k Keeper) Delegate(ctx sdk.Context, from types.EthereumAddress, to types.ConsensusAddress, amount sdk.Int) error {
+func (k Keeper) Delegate(ctx sdk.Context, from sdk.AccAddress, to types4.Operator, amount sdk.Int) error {
+	if amount.Uint64() == 0 {
+		return nil
+	}
+	_, err := k.StakingKeeper.Delegate(
+		ctx,
+		sdk.AccAddress(to.ConsensusAddress),
+		amount,
+		sdk.Unbonded,
+		*to.CosmosValidatorRef,
+		true,
+	)
+	if err != nil {
+		return sdkerrors.Wrap(err, "Could not self delegate to new operator")
+	}
 	return nil
 }
-
-//

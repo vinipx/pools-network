@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	app2 "github.com/bloxapp/pools-network/app"
+
 	testing2 "github.com/bloxapp/pools-network/shared/testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -159,4 +161,71 @@ func TestGetAndSetClaimAttestation(t *testing.T) {
 		[]byte{0x1, 0x1, 0x1, 0x1},
 		att.Claim.TxHash,
 	)
+}
+
+func TestProcessAttestation(t *testing.T) {
+	// create operator
+	app, ctx, accounts := testing2.SetupAppForTesting(false)
+
+	account := accounts[0]
+	consensusAddress := sharedTypes.ConsensusAddress(account)
+	pk := randConsensusKey(t)
+
+	operator := types.Operator{
+		ConsensusAddress: consensusAddress,
+		EthereumAddress:  sharedTypes.EthereumAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+		ConsensusPk:      pk,
+		EthStake:         0,
+	}
+	err := app.PoolsKeeper.CreateOperator(ctx, operator)
+	require.NoError(t, err)
+	app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+
+	// make sure it has no power
+	require.EqualValues(t, 0, app.StakingKeeper.GetLastValidatorPower(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(operator.ConsensusAddress)))
+
+	// test
+	tests := []struct {
+		name          string
+		attestation   *types2.ClaimAttestation
+		verifyHandler func(t *testing.T, ctx github_com_cosmos_cosmos_sdk_types.Context, app *app2.App)
+		expectedErr   string
+	}{
+		{
+			name: "unsupported claim",
+			attestation: &types2.ClaimAttestation{
+				Claim: types2.ClaimData{
+					ClaimType: types2.ClaimType(10),
+				},
+			},
+			expectedErr: "Unsupported claim",
+		},
+		{
+			name: "delegate",
+			attestation: &types2.ClaimAttestation{
+				Claim: types2.ClaimData{
+					ClaimType:         types2.ClaimType_Delegate,
+					EthereumAddresses: []sharedTypes.EthereumAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, operator.EthereumAddress},
+					Values:            []uint64{github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64()},
+				},
+			},
+			verifyHandler: func(t *testing.T, ctx github_com_cosmos_cosmos_sdk_types.Context, app *app2.App) {
+				power := app.StakingKeeper.GetLastValidatorPower(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(operator.ConsensusAddress))
+				require.EqualValues(t, 10, power)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := app.BridgeKeeper.ProcessAttestation(ctx, test.attestation)
+			if len(test.expectedErr) == 0 {
+				require.NoError(t, err)
+				app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+				test.verifyHandler(t, ctx, app)
+			} else {
+				require.EqualError(t, err, test.expectedErr)
+			}
+		})
+	}
 }

@@ -7,9 +7,31 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func (k Keeper) processAttestation(ctx sdk.Context, attestation *types2.ClaimAttestation) error {
-	//k.getClaim()
-	return nil // TODO
+func (k Keeper) ProcessAttestation(ctx sdk.Context, attestation *types2.ClaimAttestation) error {
+	claim := attestation.Claim
+	switch claim.ClaimType {
+	case types2.ClaimType_Delegate:
+		// 1. create delegator
+		delegatorAccount := sdk.AccAddress(claim.EthereumAddresses[0][:])
+		k.PoolsKeeper.CreateDelegator(ctx, delegatorAccount, claim.Values[0])
+
+		// 2. find operator
+		operatorAddress := claim.EthereumAddresses[1]
+		operator, found, err := k.PoolsKeeper.GetOperatorByEthereumAddress(ctx, operatorAddress)
+		if !found {
+			return types2.ErrOperatorNotFound
+		}
+		if err != nil {
+			return err
+		}
+		return k.PoolsKeeper.Delegate(ctx, delegatorAccount, operator, sdk.NewIntFromUint64(claim.Values[0]))
+		return nil
+	case types2.ClaimType_Undelegate:
+		return nil
+	default:
+		return types2.ErrUnsupportedClaim
+	}
+	return nil
 }
 
 func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {

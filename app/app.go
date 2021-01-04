@@ -301,6 +301,8 @@ func New(
 		appCodec,
 		keys[poolsnetworktypes.StoreKey],
 		stakingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition

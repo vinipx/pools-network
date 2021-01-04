@@ -94,6 +94,14 @@ func (k Keeper) GetOperator(ctx sdk.Context, address types.ConsensusAddress) (op
 	return ret, true, nil
 }
 
+func (k Keeper) GetOperatorByEthereumAddress(ctx sdk.Context, address types.EthereumAddress) (operator poolTypes.Operator, found bool, err error) {
+	consensusAddress, found := k.getOperatorAddressByEthereumAddress(ctx, address)
+	if !found {
+		return poolTypes.Operator{}, false, nil
+	}
+	return k.GetOperator(ctx, consensusAddress)
+}
+
 // SetOperator is responsible for saving the pools operator and it's reference cosmos validator.
 // This is an important relationship as an operator should be identified i a one-to-one relationship with a
 // cosmos validator for the consensus to work.
@@ -111,6 +119,7 @@ func (k Keeper) setOperator(ctx sdk.Context, operator poolTypes.Operator) error 
 		return sdkerrors.Wrap(err, "Could not set operator")
 	}
 	store.Set(cpy.ConsensusAddress, byts)
+	k.setOperatorEthereumAddressRef(ctx, operator)
 
 	// An operator is a wrapper around the native staking validator found in the staking module
 	// https://github.com/cosmos/cosmos-sdk/tree/master/x/staking
@@ -128,4 +137,20 @@ func (k Keeper) setOperator(ctx sdk.Context, operator poolTypes.Operator) error 
 	k.StakingKeeper.AfterValidatorCreated(ctx, val.GetOperator())
 
 	return nil
+}
+
+// setOperatorEthereumAddressRef sets a mapping between an operator's ethereum address and his consensus address
+func (k Keeper) setOperatorEthereumAddressRef(ctx sdk.Context, operator poolTypes.Operator) {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(operator.EthereumAddress[:], operator.ConsensusAddress)
+}
+
+func (k Keeper) getOperatorAddressByEthereumAddress(ctx sdk.Context, address types.EthereumAddress) (types.ConsensusAddress, bool) {
+	store := ctx.KVStore(k.storeKey)
+	byts := store.Get(address[:])
+
+	if byts == nil || len(byts) == 0 {
+		return nil, false
+	}
+	return byts, true
 }

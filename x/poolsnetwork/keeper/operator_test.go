@@ -87,3 +87,32 @@ func TestCreateOperator(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, found)
 }
+
+func TestGetOperatorByEthereumAddress(t *testing.T) {
+	keeper, ctx, accounts := CreateTestEnv(t)
+
+	sk := ed25519.GenPrivKey()
+	pk := sk.PubKey()
+	encoded, err := github_com_cosmos_cosmos_sdk_types.Bech32ifyPubKey(github_com_cosmos_cosmos_sdk_types.Bech32PubKeyTypeConsPub, pk)
+	require.NoError(t, err)
+
+	err = keeper.CreateOperator(ctx, types.Operator{
+		EthereumAddress:  shared.EthereumAddress{1, 2, 3, 4},
+		ConsensusAddress: shared.ConsensusAddress(accounts[0]),
+		ConsensusPk:      encoded,
+		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
+		CdtBalance:       2,
+	})
+	require.NoError(t, err)
+
+	// verify existing operator
+	operator, found, err := keeper.GetOperatorByEthereumAddress(ctx, shared.EthereumAddress{1, 2, 3, 4})
+	require.NoError(t, err)
+	require.True(t, found)
+	require.EqualValues(t, shared.ConsensusAddress(accounts[0]), operator.ConsensusAddress)
+
+	// verify non existing operator
+	_, found, err = keeper.GetOperatorByEthereumAddress(ctx, shared.EthereumAddress{1, 2, 3, 5})
+	require.NoError(t, err)
+	require.False(t, found)
+}

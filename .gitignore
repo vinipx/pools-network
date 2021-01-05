@@ -60,3 +60,6 @@ dependency-graph.png
 
 # IDEA
 .idea
+
+# temp
+.tmp_local_testnet

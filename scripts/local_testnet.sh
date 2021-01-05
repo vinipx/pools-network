@@ -23,7 +23,7 @@ generate_keys() {
   $binary unsafe-reset-all
   params="--keyring-backend test --keyring-dir $working_dir/keys"
 
-  for i in 1 2 3 4
+  for i in 1
   do
     val_name="validator_$i"
     $binary keys add $val_name $params
@@ -31,8 +31,7 @@ generate_keys() {
 
     # gentx
     mkdir $working_dir/config/gentx
-    pubkey=$($binary keys show --keyring-backend test --keyring-dir $working_dir/keys $val_name --pubkey --bech cons)
-    echo $pubkey
+    pubkey=$($binary tendermint show-validator --home $working_dir)
     $binary gentx $val_name --pubkey $pubkey --chain-id=$testnet_name --home $working_dir --output-document $working_dir/config/gentx/gentx_$val_name.json $params
   done
 
@@ -43,4 +42,7 @@ generate_keys() {
 #init
 #generate_keys
 
-$binary start --home $working_dir
+$binary start --home $working_dir --trace
+
+#$binary tendermint show-validator --home $working_dir
+

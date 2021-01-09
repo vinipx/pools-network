@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"os"
 	"path/filepath"
 	"time"
@@ -12,6 +11,7 @@ import (
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
+	"github.com/tendermint/tendermint/config"
 	types3 "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/x/genutil/types"
@@ -38,7 +38,7 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/tendermint/tendermint/config"
+	tendermintConfig "github.com/tendermint/tendermint/config"
 
 	"github.com/spf13/viper"
 
@@ -60,24 +60,27 @@ var (
 )
 
 type testnetConfig struct {
-	ctxConfig         *config.Config
-	Encoding          params.EncodingConfig
-	BasicAppManager   module.BasicManager
-	BalancesIterator  banktypes.GenesisBalancesIterator
-	OutputDir         string
-	ChainID           string
-	MinGasPrices      string
-	NodeDirPrefix     string
-	NodeDaemonHome    string
-	NodeCLIHome       string
-	StartingIPAddress string
-	NumValidators     int
+	Encoding         params.EncodingConfig
+	BasicAppManager  module.BasicManager
+	BalancesIterator banktypes.GenesisBalancesIterator
+	OutputDir        string
+	ChainID          string
+	MinGasPrices     string
+	NodeDirPrefix    string
+	NodeDaemonHome   string
+	NodeCLIHome      string
+	NumValidators    int
 }
 
-const nodeDirPerm = 0755
+const (
+	nodeDirPerm     = 0755
+	localHost       = "127.0.0.1"
+	P2PPortTemplate = "2665%d"
+	RPCPortTemplate = "2664%d"
+)
 
 // get cmd to initialize all files for tendermint testnet and application
-func testnetCmd(ctx *server.Context, encoding params.EncodingConfig,
+func testnetCmd(encoding params.EncodingConfig,
 	mbm module.BasicManager,
 	genBalIterator banktypes.GenesisBalancesIterator,
 ) *cobra.Command {
@@ -94,18 +97,16 @@ Example:
 	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLocalTestnetCmd(cmd, &testnetConfig{
-				ctxConfig:         ctx.Config,
-				Encoding:          encoding,
-				BasicAppManager:   mbm,
-				BalancesIterator:  genBalIterator,
-				OutputDir:         viper.GetString(flagOutputDir),
-				ChainID:           viper.GetString(flags.FlagChainID),
-				MinGasPrices:      viper.GetString(server.FlagMinGasPrices),
-				NodeDirPrefix:     viper.GetString(flagNodeDirPrefix),
-				NodeDaemonHome:    viper.GetString(flagNodeDaemonHome),
-				NodeCLIHome:       viper.GetString(flagNodeCLIHome),
-				StartingIPAddress: viper.GetString(flagStartingIPAddress),
-				NumValidators:     viper.GetInt(flagNumValidators),
+				Encoding:         encoding,
+				BasicAppManager:  mbm,
+				BalancesIterator: genBalIterator,
+				OutputDir:        viper.GetString(flagOutputDir),
+				ChainID:          viper.GetString(flags.FlagChainID),
+				MinGasPrices:     viper.GetString(server.FlagMinGasPrices),
+				NodeDirPrefix:    viper.GetString(flagNodeDirPrefix),
+				NodeDaemonHome:   viper.GetString(flagNodeDaemonHome),
+				NodeCLIHome:      viper.GetString(flagNodeCLIHome),
+				NumValidators:    viper.GetInt(flagNumValidators),
 			})
 		},
 	}
@@ -120,8 +121,6 @@ Example:
 		"Home directory of the node's daemon configuration")
 	cmd.Flags().String(flagNodeCLIHome, "poolscli",
 		"Home directory of the node's cli configuration")
-	cmd.Flags().String(flagStartingIPAddress, "192.168.0.1",
-		"Starting IP address (192.168.0.1 results in persistent peers list ID0@192.168.0.1:46656, ID1@192.168.0.2:46656, ...)")
 	cmd.Flags().String(flags.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
 	cmd.Flags().String(
 		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
@@ -146,7 +145,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 	nodeIDs := make([]string, 0)
 	nodeDirs := make([]string, 0)
 	valPubKeys := make([]crypto.PubKey, 0)
-	//genTxs := make([]types4.GenesisAccount, 0)
+	nodeConfigs := make([]*tendermintConfig.Config, 0)
 
 	var (
 		accounts        []types4.GenesisAccount
@@ -159,14 +158,14 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		nodeDirName := fmt.Sprintf("%s%d", config.NodeDirPrefix, i)
 		nodeDir := filepath.Join(config.OutputDir, nodeDirName, config.NodeDaemonHome)
 
+		ctxConfig := tendermintConfig.DefaultConfig()
+
 		// generate validator info
 		keyring, memo, nodeId, account, accountBalance, msg, err := generateValidator(i,
-			config.StartingIPAddress,
 			nodeDir,
 			config.OutputDir,
 			nodeDirName,
-			config.NodeDaemonHome,
-			config.ctxConfig,
+			ctxConfig,
 		)
 		if err != nil {
 			return err
@@ -184,8 +183,9 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		valPubKeys = append(valPubKeys, key.GetPubKey())
 		accounts = append(accounts, account)
 		accountBalances = append(accountBalances, *accountBalance)
-		genFiles = append(genFiles, config.ctxConfig.GenesisFile())
+		genFiles = append(genFiles, ctxConfig.GenesisFile())
 		nodeDirs = append(nodeDirs, nodeDir)
+		nodeConfigs = append(nodeConfigs, ctxConfig)
 
 		// build and sign tx
 		txFactory := tx2.NewFactoryCLI(clientCtx, cmd.Flags()).WithChainID(chainId).WithKeybase(keyring)
@@ -221,11 +221,28 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		return err
 	}
 
-	if err := collectGenFiles(config, clientCtx.TxConfig, chainId, monikers, nodeIDs, nodeDirs, valPubKeys); err != nil {
+	if err := collectGenFiles(config, nodeConfigs, clientCtx.TxConfig, chainId, monikers, nodeIDs, nodeDirs, valPubKeys); err != nil {
 		return err
 	}
 
+	initNetworkConfig(config, nodeConfigs, nodeDirs)
+
 	return nil
+}
+
+// initNetworkConfig sets each node's RPC and P2P addresses correctly.
+func initNetworkConfig(
+	testnetConfig *testnetConfig,
+	nodeConfigs []*tendermintConfig.Config,
+	nodeDirs []string,
+) {
+	for i := 0; i < testnetConfig.NumValidators; i++ {
+		configNode := nodeConfigs[i]
+		configNode.SetRoot(nodeDirs[i])
+		configNode.RPC.ListenAddress = tcpLocalHostWithPort(fmt.Sprintf(RPCPortTemplate, i))
+		configNode.P2P.ListenAddress = tcpLocalHostWithPort(fmt.Sprintf(P2PPortTemplate, i))
+		config.WriteConfigFile(fmt.Sprintf("%s/config/config.toml", nodeDirs[i]), configNode)
+	}
 }
 
 // initGenFiles initializeds a tendermint state with the created accounts
@@ -278,6 +295,7 @@ func initGenFiles(
 
 func collectGenFiles(
 	config *testnetConfig,
+	nodeConfigs []*tendermintConfig.Config,
 	clientCtx client.TxConfig,
 	chainId string,
 	monikers, nodeIds, nodeDirs []string,
@@ -286,7 +304,7 @@ func collectGenFiles(
 	genesisTime := time.Now()
 	for i := 0; i < config.NumValidators; i++ {
 		gentxsDir := filepath.Join(config.OutputDir, "gentxs")
-		configNode := config.ctxConfig
+		configNode := nodeConfigs[i]
 		configNode.SetRoot(nodeDirs[i])
 		configNode.Moniker = monikers[i]
 
@@ -300,7 +318,7 @@ func collectGenFiles(
 		nodeAppState, err := genutil.GenAppStateFromConfig(
 			config.Encoding.Marshaler,
 			clientCtx,
-			config.ctxConfig,
+			configNode,
 			initConfig,
 			*genDoc,
 			config.BalancesIterator,
@@ -320,13 +338,11 @@ func collectGenFiles(
 
 func generateValidator(
 	indx int,
-	startingIPAddress string,
 	nodeDir string,
-	outputDir, nodeDirName, nodeDaemonHome string,
+	outputDir, nodeDirName string,
 	ctxConfig *config.Config,
 ) (keyring keyringTypes.Keyring, memo string, nodeId string, account types4.GenesisAccount, accountBalance *banktypes.Balance, msg *types2.MsgCreateValidator, err error) {
 	ctxConfig.SetRoot(nodeDir)
-	ctxConfig.RPC.ListenAddress = "tcp://0.0.0.0:26657"
 
 	// make config dir
 	if err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm); err != nil {
@@ -344,13 +360,8 @@ func generateValidator(
 		return nil, "", "", nil, nil, nil, err
 	}
 
-	// ip and memo
-	ip, err := getIP(indx, startingIPAddress)
-	if err != nil {
-		_ = os.RemoveAll(outputDir)
-		return nil, "", "", nil, nil, nil, err
-	}
-	memo = fmt.Sprintf("%s@%s:26656", nodeID, ip)
+	// When collecting gen txs cosmos SDK parses the memo to get the node's persistent address
+	memo = fmt.Sprintf("%s@%s", nodeID, localHostWithPort(fmt.Sprintf(P2PPortTemplate, indx)))
 
 	// generate keyring
 	keyring, err = keyringTypes.New("", keyringTypes.BackendMemory, outputDir, nil)
@@ -389,30 +400,6 @@ func generateValidator(
 	return keyring, memo, nodeID, account, accountBalance, msg, nil
 }
 
-func getIP(i int, startingIPAddr string) (ip string, err error) {
-	if len(startingIPAddr) == 0 {
-		ip, err = server.ExternalIP()
-		if err != nil {
-			return "", err
-		}
-		return ip, nil
-	}
-	return calculateIP(startingIPAddr, i)
-}
-
-func calculateIP(ip string, i int) (string, error) {
-	ipv4 := net.ParseIP(ip).To4()
-	if ipv4 == nil {
-		return "", fmt.Errorf("%v: non ipv4 address", ip)
-	}
-
-	for j := 0; j < i; j++ {
-		ipv4[3]++
-	}
-
-	return ipv4.String(), nil
-}
-
 func writeFile(name string, dir string, contents []byte) error {
 	writePath := filepath.Join(dir)
 	file := filepath.Join(writePath, name)
@@ -428,4 +415,12 @@ func writeFile(name string, dir string, contents []byte) error {
 	}
 
 	return nil
+}
+
+func localHostWithPort(port string) string {
+	return fmt.Sprintf("%s:%s", localHost, port)
+}
+
+func tcpLocalHostWithPort(port string) string {
+	return fmt.Sprintf("tcp://%s", localHostWithPort(port))
 }

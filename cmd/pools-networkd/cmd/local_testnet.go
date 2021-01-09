@@ -73,10 +73,11 @@ type testnetConfig struct {
 }
 
 const (
-	nodeDirPerm     = 0755
-	localHost       = "127.0.0.1"
-	P2PPortTemplate = "2665%d"
-	RPCPortTemplate = "2664%d"
+	nodeDirPerm      = 0755
+	localHost        = "127.0.0.1"
+	P2PPortTemplate  = "500%d"
+	RPCPortTemplate  = "600%d"
+	GRPCPortTemplate = "700%d"
 )
 
 // get cmd to initialize all files for tendermint testnet and application
@@ -146,6 +147,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 	nodeDirs := make([]string, 0)
 	valPubKeys := make([]crypto.PubKey, 0)
 	nodeConfigs := make([]*tendermintConfig.Config, 0)
+	appConfigs := make([]*config2.Config, 0)
 
 	var (
 		accounts        []types4.GenesisAccount
@@ -177,6 +179,11 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 			return err
 		}
 
+		// write app config
+		configFilePath := filepath.Join(nodeDir, "config/app.toml")
+		appConfig := config2.DefaultConfig()
+		config2.WriteConfigFile(configFilePath, appConfig)
+
 		// add relevant data to arrays
 		monikers = append(monikers, nodeDirName)
 		nodeIDs = append(nodeIDs, nodeId)
@@ -186,6 +193,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		genFiles = append(genFiles, ctxConfig.GenesisFile())
 		nodeDirs = append(nodeDirs, nodeDir)
 		nodeConfigs = append(nodeConfigs, ctxConfig)
+		appConfigs = append(appConfigs, appConfig)
 
 		// build and sign tx
 		txFactory := tx2.NewFactoryCLI(clientCtx, cmd.Flags()).WithChainID(chainId).WithKeybase(keyring)
@@ -211,10 +219,6 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 			_ = os.RemoveAll(config.OutputDir)
 			return err
 		}
-
-		// write app config
-		gaiaConfigFilePath := filepath.Join(nodeDir, "config/app.toml")
-		config2.WriteConfigFile(gaiaConfigFilePath, config2.DefaultConfig())
 	}
 
 	if err := initGenFiles(config, clientCtx, accounts, accountBalances, chainId, genFiles); err != nil {
@@ -225,7 +229,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		return err
 	}
 
-	initNetworkConfig(config, nodeConfigs, nodeDirs)
+	initNetworkConfig(config, nodeConfigs, appConfigs, nodeDirs)
 
 	return nil
 }
@@ -234,6 +238,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 func initNetworkConfig(
 	testnetConfig *testnetConfig,
 	nodeConfigs []*tendermintConfig.Config,
+	appConfigs []*config2.Config,
 	nodeDirs []string,
 ) {
 	for i := 0; i < testnetConfig.NumValidators; i++ {
@@ -241,7 +246,13 @@ func initNetworkConfig(
 		configNode.SetRoot(nodeDirs[i])
 		configNode.RPC.ListenAddress = tcpLocalHostWithPort(fmt.Sprintf(RPCPortTemplate, i))
 		configNode.P2P.ListenAddress = tcpLocalHostWithPort(fmt.Sprintf(P2PPortTemplate, i))
+		configNode.P2P.AddrBookStrict = false
+		configNode.P2P.AllowDuplicateIP = true
 		config.WriteConfigFile(fmt.Sprintf("%s/config/config.toml", nodeDirs[i]), configNode)
+
+		appConfigs[i].GRPC.Address = localHostWithPort(fmt.Sprintf(GRPCPortTemplate, i))
+		configFilePath := filepath.Join(nodeDirs[i], "config/app.toml")
+		config2.WriteConfigFile(configFilePath, appConfigs[i])
 	}
 }
 
@@ -354,7 +365,7 @@ func generateValidator(
 	ctxConfig.Moniker = nodeDirName
 
 	// generate node id and validator pk
-	nodeID, _, err := genutil.InitializeNodeValidatorFiles(ctxConfig)
+	nodeID, valPubKey, err := genutil.InitializeNodeValidatorFiles(ctxConfig)
 	if err != nil {
 		_ = os.RemoveAll(outputDir)
 		return nil, "", "", nil, nil, nil, err
@@ -389,7 +400,7 @@ func generateValidator(
 	// validator account and create validator tx
 	msg = types2.NewMsgCreateValidator(
 		sdk.ValAddress(info.GetAddress()),
-		info.GetPubKey(),
+		valPubKey,
 		sdk.NewCoin(sdk.DefaultBondDenom,
 			sdk.TokensFromConsensusPower(100)),
 		types2.NewDescription(nodeDirName, "", "", "", ""),

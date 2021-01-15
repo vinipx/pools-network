@@ -25,13 +25,11 @@ func (k Keeper) ProcessAttestation(ctx sdk.Context, attestation *types2.ClaimAtt
 			return err
 		}
 		return k.PoolsKeeper.Delegate(ctx, delegatorAccount, operator, sdk.NewIntFromUint64(claim.Values[0]))
-		return nil
 	case types2.ClaimType_Undelegate:
 		return nil
 	default:
 		return types2.ErrUnsupportedClaim
 	}
-	return nil
 }
 
 func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {

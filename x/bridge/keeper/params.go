@@ -5,7 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// returns the max possible delegate claims in a MsgEthereumClaim
+// GetMaxClaims returns the max possible delegate claims in a MsgEthereumClaim
 func (k Keeper) GetMaxClaims(ctx sdk.Context) (res uint64) {
 	k.paramstore.Get(ctx, types.KeyMaxClaims, &res)
 	return

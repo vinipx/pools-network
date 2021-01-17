@@ -7,6 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+// ProcessAttestation process attestation via Pools Keeper delegator and operator
 func (k Keeper) ProcessAttestation(ctx sdk.Context, attestation *types2.ClaimAttestation) error {
 	claim := attestation.Claim
 	switch claim.ClaimType {
@@ -32,7 +33,13 @@ func (k Keeper) ProcessAttestation(ctx sdk.Context, attestation *types2.ClaimAtt
 	}
 }
 
-func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract types2.EthereumBridgeContact, claim types2.ClaimData) (*types2.ClaimAttestation, error) {
+// AttestClaim checks claim's validity and return its attestation
+func (k Keeper) AttestClaim(
+	ctx sdk.Context,
+	operator types3.Operator,
+	contract types2.EthereumBridgeContact,
+	claim types2.ClaimData,
+) (*types2.ClaimAttestation, error) {
 	att, found, err := k.GetAttestation(ctx, contract, claim)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "could not get attestation")
@@ -66,6 +73,7 @@ func (k Keeper) AttestClaim(ctx sdk.Context, operator types3.Operator, contract 
 	return att, nil
 }
 
+// SaveAttestation persists claim attestation to the store
 func (k Keeper) SaveAttestation(
 	ctx sdk.Context,
 	claimAttestation *types2.ClaimAttestation,
@@ -80,6 +88,7 @@ func (k Keeper) SaveAttestation(
 	return nil
 }
 
+// GetAttestation returns claim's attestation from the store
 func (k Keeper) GetAttestation(
 	ctx sdk.Context,
 	contract types2.EthereumBridgeContact,
@@ -94,7 +103,7 @@ func (k Keeper) GetAttestation(
 	// unmarshal
 	ret := &types2.ClaimAttestation{}
 	if err := ret.Unmarshal(byts); err != nil {
-		return nil, true, err
+		return nil, false, err
 	}
 	return ret, true, nil
 }

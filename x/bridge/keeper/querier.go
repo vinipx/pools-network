@@ -2,14 +2,15 @@ package keeper
 
 import (
 	// this line is used by starport scaffolding # 1
+	"github.com/bloxapp/pools-network/x/bridge/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/bloxapp/pools-network/x/bridge/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// NewQuerier implements the sdk.Querier function to serve as module level router for state queries
 func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		var (

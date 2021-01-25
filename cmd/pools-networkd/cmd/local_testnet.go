@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
+	github_com_bloxapp_pools_network_shared_types "github.com/bloxapp/pools-network/shared/types"
+
+	types5 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
+
 	types4 "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -151,6 +155,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 
 	var (
 		accounts        []types4.GenesisAccount
+		genOperators    []types5.Operator
 		accountBalances []banktypes.Balance
 		genFiles        []string
 	)
@@ -163,7 +168,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		ctxConfig := tendermintConfig.DefaultConfig()
 
 		// generate validator info
-		keyring, memo, nodeId, account, accountBalance, msg, err := generateValidator(i,
+		keyring, memo, nodeId, account, accountBalance, msg, operator, err := generateOperator(i,
 			nodeDir,
 			config.OutputDir,
 			nodeDirName,
@@ -194,6 +199,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		nodeDirs = append(nodeDirs, nodeDir)
 		nodeConfigs = append(nodeConfigs, ctxConfig)
 		appConfigs = append(appConfigs, appConfig)
+		genOperators = append(genOperators, *operator)
 
 		// build and sign tx
 		txFactory := tx2.NewFactoryCLI(clientCtx, cmd.Flags()).WithChainID(chainId).WithKeybase(keyring)
@@ -225,7 +231,7 @@ func runLocalTestnetCmd(cmd *cobra.Command, config *testnetConfig) error {
 		return err
 	}
 
-	if err := collectGenFiles(config, nodeConfigs, clientCtx.TxConfig, chainId, monikers, nodeIDs, nodeDirs, valPubKeys); err != nil {
+	if err := collectGenFiles(config, nodeConfigs, clientCtx, chainId, monikers, nodeIDs, nodeDirs, valPubKeys, genOperators); err != nil {
 		return err
 	}
 
@@ -304,13 +310,16 @@ func initGenFiles(
 	return nil
 }
 
+// collectGenFiles takes the gentx's created and puts
+// them into the genutil module which will run on node start and generate the relevant operators and validators
 func collectGenFiles(
 	config *testnetConfig,
 	nodeConfigs []*tendermintConfig.Config,
-	clientCtx client.TxConfig,
+	clientCtx client.Context,
 	chainId string,
 	monikers, nodeIds, nodeDirs []string,
 	valPks []crypto.PubKey,
+	genOperators []types5.Operator,
 ) error {
 	genesisTime := time.Now()
 	for i := 0; i < config.NumValidators; i++ {
@@ -319,6 +328,7 @@ func collectGenFiles(
 		configNode.SetRoot(nodeDirs[i])
 		configNode.Moniker = monikers[i]
 
+		// config for inserting validator data into the genesis state
 		initConfig := types.NewInitConfig(chainId, gentxsDir, nodeIds[i], valPks[i])
 
 		genDoc, err := types3.GenesisDocFromFile(configNode.GenesisFile())
@@ -326,9 +336,25 @@ func collectGenFiles(
 			return err
 		}
 
+		// create pools operators for generated validators
+		appGenesisState, err := types.GenesisStateFromGenDoc(*genDoc)
+		if err != nil {
+			return err
+		}
+		var poolsGenState types5.GenesisState
+		clientCtx.JSONMarshaler.MustUnmarshalJSON(appGenesisState[types5.ModuleName], &poolsGenState)
+		poolsGenState.Operators = genOperators
+		appGenesisState[types5.ModuleName] = clientCtx.JSONMarshaler.MustMarshalJSON(&poolsGenState)
+		// put back into gendoc
+		genDoc.AppState, err = json.MarshalIndent(appGenesisState, "", "  ")
+		if err != nil {
+			return err
+		}
+
+		// places gen txs into the genesis state
 		nodeAppState, err := genutil.GenAppStateFromConfig(
 			config.Encoding.Marshaler,
-			clientCtx,
+			clientCtx.TxConfig,
 			configNode,
 			initConfig,
 			*genDoc,
@@ -347,18 +373,28 @@ func collectGenFiles(
 	return nil
 }
 
-func generateValidator(
+func generateOperator(
 	indx int,
 	nodeDir string,
 	outputDir, nodeDirName string,
 	ctxConfig *config.Config,
-) (keyring keyringTypes.Keyring, memo string, nodeId string, account types4.GenesisAccount, accountBalance *banktypes.Balance, msg *types2.MsgCreateValidator, err error) {
+) (
+	keyring keyringTypes.Keyring,
+	memo string,
+	nodeId string,
+	account types4.GenesisAccount,
+	accountBalance *banktypes.Balance,
+	msgValidator *types2.MsgCreateValidator,
+	operator *types5.Operator,
+	err error,
+) {
 	ctxConfig.SetRoot(nodeDir)
 
 	// make config dir
-	if err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm); err != nil {
+	err = os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm)
+	if err != nil {
 		_ = os.RemoveAll(outputDir)
-		return nil, "", "", nil, nil, nil, err
+		return
 	}
 
 	// moniker
@@ -368,7 +404,7 @@ func generateValidator(
 	nodeID, valPubKey, err := genutil.InitializeNodeValidatorFiles(ctxConfig)
 	if err != nil {
 		_ = os.RemoveAll(outputDir)
-		return nil, "", "", nil, nil, nil, err
+		return
 	}
 
 	// When collecting gen txs cosmos SDK parses the memo to get the node's persistent address
@@ -377,12 +413,12 @@ func generateValidator(
 	// generate keyring
 	keyring, err = keyringTypes.New("", keyringTypes.BackendMemory, outputDir, nil)
 	if err != nil {
-		return nil, "", "", nil, nil, nil, err
+		return
 	}
 	path := hd.CreateHDPath(118, 0, 0).String()
 	info, _, err := keyring.NewMnemonic(nodeDirName, keyringTypes.English, path, hd.Secp256k1)
 	if err != nil {
-		return nil, "", "", nil, nil, nil, err
+		return
 	}
 
 	// generate account
@@ -398,7 +434,7 @@ func generateValidator(
 	account = types4.NewBaseAccount(info.GetAddress(), nil, 0, 0)
 
 	// validator account and create validator tx
-	msg = types2.NewMsgCreateValidator(
+	msgValidator = types2.NewMsgCreateValidator(
 		sdk.ValAddress(info.GetAddress()),
 		valPubKey,
 		sdk.NewCoin(sdk.DefaultBondDenom,
@@ -408,7 +444,19 @@ func generateValidator(
 		sdk.OneInt(),
 	)
 
-	return keyring, memo, nodeID, account, accountBalance, msg, nil
+	// create operator which refers the created validator
+	encodedPk, err := sdk.Bech32ifyPubKey(sdk.Bech32PubKeyTypeConsPub, valPubKey)
+	if err != nil {
+		return
+	}
+	operator = &types5.Operator{
+		EthereumAddress:  github_com_bloxapp_pools_network_shared_types.EthereumAddress{},
+		ConsensusAddress: github_com_bloxapp_pools_network_shared_types.ConsensusAddress(valPubKey.Address()),
+		ConsensusPk:      encodedPk,
+		EthStake:         msgValidator.Value.Amount.Uint64(),
+	}
+
+	return
 }
 
 func writeFile(name string, dir string, contents []byte) error {

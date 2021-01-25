@@ -3,7 +3,7 @@
 working_dir=./.tmp_local_testnet
 binary=$working_dir/build/pools
 testnet_name="local_test_net"
-generated_nodes=6
+generated_nodes=4
 
 cleanup() {
   #  key dir

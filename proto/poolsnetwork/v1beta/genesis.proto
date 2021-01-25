@@ -1,9 +1,13 @@
 syntax = "proto3";
-package poolsnetwork.poolsnetwork.v1beta1;
+package poolsnetwork.v1beta1;
+
+import "poolsnetwork/v1beta/operator.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "github.com/bloxapp/pools-network/x/poolsnetwork/types";
 
 // GenesisState defines the capability module's genesis state.
 message GenesisState {
+    repeated Operator operators = 1 [(gogoproto.nullable) = false];
 }
 

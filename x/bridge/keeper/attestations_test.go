@@ -103,8 +103,8 @@ func TestAttestClaim(t *testing.T) {
 				account := accounts[indx]
 				consensusAddress := sharedTypes.ConsensusAddress(account)
 				operator, found, err := app.PoolsKeeper.GetOperator(ctx, consensusAddress)
-				require.True(t, found)
 				require.NoError(t, err)
+				require.True(t, found)
 
 				_, err = app.BridgeKeeper.AttestClaim(ctx, operator, contract, test.claim)
 				require.NoError(t, err)

@@ -1,6 +1,6 @@
 # poolsnetwork
 
-**poolsnetwork** is a blockchain application built using Cosmos SDK and Tendermint and generated with [Starport](https://github.com/tendermint/starport).
+**poolsnetwork** is a blockchain application built using [Cosmos SDK](https://cosmos.network/sdk) and [Tendermint](https://tendermint.com/) and generated with [Starport](https://github.com/tendermint/starport).
 
 ## Get started
 
@@ -9,6 +9,8 @@ starport serve
 ```
 
 `serve` command installs dependencies, initializes and runs the application.
+
+*Note: use* `--verbose` *for a more detailed view of operations happening on the background*.
 
 ## Configure
 

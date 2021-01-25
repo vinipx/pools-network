@@ -75,7 +75,7 @@ func TestNewMsgEthereumClaimAnteHandler(t *testing.T) {
 			msgEthereumClaim: &types.MsgEthereumClaim{
 				Data: populateWithClaims(validClaim(), 26),
 			},
-			errStr: "maximum number of claims is 25 but received 26: Ivalid MsgEthereumClaimAnteHandler",
+			errStr: "maximum number of claims is 25 but received 26: Invalid MsgEthereumClaimAnteHandler",
 		},
 		{
 			name: "invalid claim data",

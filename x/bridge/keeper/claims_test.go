@@ -32,15 +32,15 @@ func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
 
 	// find valid
 	c, found, err := keeper.GetEthereumBridgeContract(ctx, types.EthereumAddress{1, 2, 3, 4})
-	require.True(t, found)
 	require.NoError(t, err)
+	require.True(t, found)
 	require.EqualValues(t, types.EthereumAddress{1, 2, 3, 4}, c.ContractAddress)
 	require.EqualValues(t, 2, c.ChainId)
 
 	// find invalid
 	_, found, err = keeper.GetEthereumBridgeContract(ctx, types.EthereumAddress{1, 2, 3, 5})
-	require.False(t, found)
 	require.NoError(t, err)
+	require.False(t, found)
 }
 
 func TestAddClaim(t *testing.T) {

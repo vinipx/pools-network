@@ -83,8 +83,8 @@ func TestAttestClaim(t *testing.T) {
 			require.NoError(t, err)
 
 			// operators
-			for _, indx := range test.createOperatorsFromAccountIds {
-				account := accounts[indx]
+			for _, index := range test.createOperatorsFromAccountIds {
+				account := accounts[index]
 				consensusAddress := sharedTypes.ConsensusAddress(account)
 				pk := randConsensusKey(t)
 
@@ -99,12 +99,12 @@ func TestAttestClaim(t *testing.T) {
 			app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 
 			// attest claim
-			for _, indx := range test.attestClaimAccountIdx {
-				account := accounts[indx]
+			for _, index := range test.attestClaimAccountIdx {
+				account := accounts[index]
 				consensusAddress := sharedTypes.ConsensusAddress(account)
 				operator, found, err := app.PoolsKeeper.GetOperator(ctx, consensusAddress)
-				require.True(t, found)
 				require.NoError(t, err)
+				require.True(t, found)
 
 				_, err = app.BridgeKeeper.AttestClaim(ctx, operator, contract, test.claim)
 				require.NoError(t, err)

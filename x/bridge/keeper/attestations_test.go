@@ -8,18 +8,18 @@ import (
 	testing2 "github.com/bloxapp/pools-network/shared/testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
 
 	sharedTypes "github.com/bloxapp/pools-network/shared/types"
-	types2 "github.com/bloxapp/pools-network/x/bridge/types"
+	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
 	"github.com/bloxapp/pools-network/x/poolsnetwork/types"
+	sdkTypes "github.com/cosmos/cosmos-sdk/types"
 )
 
 func randConsensusKey(t *testing.T) string {
 	pk := ed25519.GenPrivKey().PubKey()
-	encoded, err := github_com_cosmos_cosmos_sdk_types.Bech32ifyPubKey(github_com_cosmos_cosmos_sdk_types.Bech32PubKeyTypeConsPub, pk)
+	encoded, err := sdkTypes.Bech32ifyPubKey(sdkTypes.Bech32PubKeyTypeConsPub, pk)
 	require.NoError(t, err)
 
 	return encoded
@@ -30,7 +30,7 @@ func TestAttestClaim(t *testing.T) {
 		name                          string
 		createOperatorsFromAccountIds []uint64
 		attestClaimAccountIdx         []uint64
-		claim                         types2.ClaimData
+		claim                         bridgeTypes.ClaimData
 		finalPower                    uint64 // the final power the attestation attested to
 		finalized                     bool
 	}{
@@ -38,7 +38,7 @@ func TestAttestClaim(t *testing.T) {
 			name:                          "valid, not finalized attestation",
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0},
-			claim: types2.ClaimData{
+			claim: bridgeTypes.ClaimData{
 				TxHash:     []byte{1, 1, 1, 1},
 				ClaimNonce: 1,
 			},
@@ -49,7 +49,7 @@ func TestAttestClaim(t *testing.T) {
 			name:                          "valid, not finalized attestation",
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0, 1},
-			claim: types2.ClaimData{
+			claim: bridgeTypes.ClaimData{
 				TxHash:     []byte{1, 1, 1, 1},
 				ClaimNonce: 1,
 			},
@@ -60,7 +60,7 @@ func TestAttestClaim(t *testing.T) {
 			name:                          "valid, finalized attestation",
 			createOperatorsFromAccountIds: []uint64{0, 1, 2, 3},
 			attestClaimAccountIdx:         []uint64{0, 1, 2},
-			claim: types2.ClaimData{
+			claim: bridgeTypes.ClaimData{
 				TxHash:     []byte{1, 1, 1, 1},
 				ClaimNonce: 1,
 			},
@@ -69,7 +69,7 @@ func TestAttestClaim(t *testing.T) {
 		},
 	}
 
-	contract := types2.EthereumBridgeContact{
+	contract := bridgeTypes.EthereumBridgeContact{
 		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
 	}
@@ -91,7 +91,7 @@ func TestAttestClaim(t *testing.T) {
 				operator := types.Operator{
 					ConsensusAddress: consensusAddress,
 					ConsensusPk:      pk,
-					EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
+					EthStake:         sdkTypes.TokensFromConsensusPower(10).Uint64(),
 				}
 				err = app.PoolsKeeper.CreateOperator(ctx, operator)
 				require.NoError(t, err)
@@ -135,19 +135,19 @@ func TestGetAndSetClaimAttestation(t *testing.T) {
 	keeper, ctx, _ := CreateTestEnv(t)
 
 	// setup
-	contract := types2.EthereumBridgeContact{
+	contract := bridgeTypes.EthereumBridgeContact{
 		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
 	}
 	err := keeper.SetEthereumBridgeContract(ctx, contract)
 	require.NoError(t, err)
 
-	claim := types2.ClaimData{
+	claim := bridgeTypes.ClaimData{
 		TxHash: []byte{1, 1, 1, 1},
 	}
 
 	// save and get
-	err = keeper.SaveAttestation(ctx, &types2.ClaimAttestation{
+	err = keeper.SaveAttestation(ctx, &bridgeTypes.ClaimAttestation{
 		Claim:            claim,
 		Contract:         contract,
 		AccumulatedPower: 10,
@@ -182,36 +182,53 @@ func TestProcessAttestation(t *testing.T) {
 	app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 
 	// make sure it has no power
-	require.EqualValues(t, 0, app.StakingKeeper.GetLastValidatorPower(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(operator.ConsensusAddress)))
+	require.EqualValues(t, 0, app.StakingKeeper.GetLastValidatorPower(ctx, sdkTypes.ValAddress(operator.ConsensusAddress)))
 
 	// test
 	tests := []struct {
 		name          string
-		attestation   *types2.ClaimAttestation
-		verifyHandler func(t *testing.T, ctx github_com_cosmos_cosmos_sdk_types.Context, app *app2.App)
+		attestation   *bridgeTypes.ClaimAttestation
+		verifyHandler func(t *testing.T, ctx sdkTypes.Context, app *app2.App)
 		expectedErr   string
 	}{
 		{
 			name: "unsupported claim",
-			attestation: &types2.ClaimAttestation{
-				Claim: types2.ClaimData{
-					ClaimType: types2.ClaimType(10),
+			attestation: &bridgeTypes.ClaimAttestation{
+				Claim: bridgeTypes.ClaimData{
+					ClaimType: bridgeTypes.ClaimType(10),
 				},
 			},
 			expectedErr: "Unsupported claim",
 		},
 		{
 			name: "delegate",
-			attestation: &types2.ClaimAttestation{
-				Claim: types2.ClaimData{
-					ClaimType:         types2.ClaimType_Delegate,
+			attestation: &bridgeTypes.ClaimAttestation{
+				Claim: bridgeTypes.ClaimData{
+					ClaimType:         bridgeTypes.ClaimType_Delegate,
 					EthereumAddresses: []sharedTypes.EthereumAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, operator.EthereumAddress},
-					Values:            []uint64{github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64()},
+					Values:            []uint64{sdkTypes.TokensFromConsensusPower(10).Uint64()},
 				},
 			},
-			verifyHandler: func(t *testing.T, ctx github_com_cosmos_cosmos_sdk_types.Context, app *app2.App) {
-				power := app.StakingKeeper.GetLastValidatorPower(ctx, github_com_cosmos_cosmos_sdk_types.ValAddress(operator.ConsensusAddress))
+			verifyHandler: func(t *testing.T, ctx sdkTypes.Context, app *app2.App) {
+				power := app.StakingKeeper.GetLastValidatorPower(ctx, sdkTypes.ValAddress(operator.ConsensusAddress))
 				require.EqualValues(t, 10, power)
+			},
+		},
+		{
+			name: "operator",
+			attestation: &bridgeTypes.ClaimAttestation{
+				Claim: bridgeTypes.ClaimData{
+					ClaimType:          bridgeTypes.ClaimType_CreateOperator,
+					EthereumAddresses:  []sharedTypes.EthereumAddress{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+					ConsensusAddresses: []sharedTypes.ConsensusAddress{{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}},
+				},
+			},
+			verifyHandler: func(t *testing.T, ctx sdkTypes.Context, app *app2.App) {
+				claimConsensusAddress := sharedTypes.ConsensusAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
+				newOperator, found, err := app.PoolsKeeper.GetOperator(ctx, claimConsensusAddress)
+				require.NoError(t, err)
+				require.True(t, found)
+				require.EqualValues(t, newOperator.ConsensusAddress, claimConsensusAddress)
 			},
 		},
 	}

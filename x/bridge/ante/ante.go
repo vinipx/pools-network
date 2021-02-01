@@ -3,14 +3,14 @@ package ante
 import (
 	"fmt"
 
-	"github.com/bloxapp/pools-network/x/bridge/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
+	sdkTypes "github.com/cosmos/cosmos-sdk/types"
+	sdkErrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 type paramsGetter interface {
 	// GetParams should return the Bridge module's params set
-	GetParams(ctx sdk.Context) types.Params
+	GetParams(ctx sdkTypes.Context) bridgeTypes.Params
 }
 
 func NewMsgEthereumClaimAnteHandler(keeper paramsGetter) MsgEthereumClaimAnteHandler {
@@ -21,20 +21,20 @@ type MsgEthereumClaimAnteHandler struct {
 	keeper paramsGetter
 }
 
-var ErrInvalidMsg = fmt.Errorf("Ivalid MsgEthereumClaimAnteHandler")
+var ErrInvalidMsg = fmt.Errorf("Invalid MsgEthereumClaimAnteHandler")
 
-func (sud MsgEthereumClaimAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
+func (sud MsgEthereumClaimAnteHandler) AnteHandle(ctx sdkTypes.Context, tx sdkTypes.Tx, simulate bool, next sdkTypes.AnteHandler) (newCtx sdkTypes.Context, err error) {
 	params := sud.keeper.GetParams(ctx)
 
 	for _, msg := range tx.GetMsgs() {
-		claims, ok := msg.(*types.MsgEthereumClaim)
+		claims, ok := msg.(*bridgeTypes.MsgEthereumClaim)
 		if !ok {
 			continue
 		}
 
 		// max delegate number
 		if uint64(len(claims.Data)) > params.MaxClaims {
-			return ctx, sdkerrors.Wrapf(ErrInvalidMsg,
+			return ctx, sdkErrors.Wrapf(ErrInvalidMsg,
 				"maximum number of claims is %d but received %d",
 				params.MaxClaims, len(claims.Data),
 			)

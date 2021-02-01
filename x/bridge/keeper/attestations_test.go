@@ -13,7 +13,7 @@ import (
 
 	sharedTypes "github.com/bloxapp/pools-network/shared/types"
 	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
-	"github.com/bloxapp/pools-network/x/poolsnetwork/types"
+	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 	sdkTypes "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -88,7 +88,7 @@ func TestAttestClaim(t *testing.T) {
 				consensusAddress := sharedTypes.ConsensusAddress(account)
 				pk := randConsensusKey(t)
 
-				operator := types.Operator{
+				operator := poolTypes.Operator{
 					ConsensusAddress: consensusAddress,
 					ConsensusPk:      pk,
 					EthStake:         sdkTypes.TokensFromConsensusPower(10).Uint64(),
@@ -171,7 +171,7 @@ func TestProcessAttestation(t *testing.T) {
 	consensusAddress := sharedTypes.ConsensusAddress(account)
 	pk := randConsensusKey(t)
 
-	operator := types.Operator{
+	operator := poolTypes.Operator{
 		ConsensusAddress: consensusAddress,
 		EthereumAddress:  sharedTypes.EthereumAddress{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 		ConsensusPk:      pk,

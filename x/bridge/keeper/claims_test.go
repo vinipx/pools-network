@@ -1,78 +1,73 @@
 package keeper_test
 
 import (
-	"testing"
-
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-
-	types3 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
-
-	types2 "github.com/bloxapp/pools-network/x/bridge/types"
-
+	sharedTypes "github.com/bloxapp/pools-network/shared/types"
+	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
+	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
+	sdkTypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-
-	"github.com/bloxapp/pools-network/shared/types"
+	"testing"
 )
 
 func TestGetAndSetLastEthereumClaimNonce(t *testing.T) {
 	keeper, ctx, _ := CreateTestEnv(t)
-	address := types.ConsensusAddress([]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+	address := sharedTypes.ConsensusAddress([]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
 	keeper.SetLastEthereumClaimNonce(ctx, address, 1)
 	res := keeper.GetLastEthereumClaimNonce(ctx, address)
 	require.EqualValues(t, uint64(1), res.Uint64())
 }
 
-func TestGetAndSetEthereumBridgeAddress(t *testing.T) {
+func TestGetAndSetEthereumBridgeContract(t *testing.T) {
 	keeper, ctx, _ := CreateTestEnv(t)
-	err := keeper.SetEthereumBridgeContract(ctx, types2.EthereumBridgeContact{
-		ContractAddress: types.EthereumAddress{1, 2, 3, 4},
+	err := keeper.SetEthereumBridgeContract(ctx, bridgeTypes.EthereumBridgeContact{
+		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
 	})
 	require.NoError(t, err)
 
 	// find valid
-	c, found, err := keeper.GetEthereumBridgeContract(ctx, types.EthereumAddress{1, 2, 3, 4})
+	c, found, err := keeper.GetEthereumBridgeContract(ctx, sharedTypes.EthereumAddress{1, 2, 3, 4})
 	require.NoError(t, err)
 	require.True(t, found)
-	require.EqualValues(t, types.EthereumAddress{1, 2, 3, 4}, c.ContractAddress)
+	require.EqualValues(t, sharedTypes.EthereumAddress{1, 2, 3, 4}, c.ContractAddress)
 	require.EqualValues(t, 2, c.ChainId)
 
 	// find invalid
-	_, found, err = keeper.GetEthereumBridgeContract(ctx, types.EthereumAddress{1, 2, 3, 5})
+	_, found, err = keeper.GetEthereumBridgeContract(ctx, sharedTypes.EthereumAddress{1, 2, 3, 5})
 	require.NoError(t, err)
 	require.False(t, found)
 }
 
-func TestAddClaim(t *testing.T) {
+func TestProcessClaim(t *testing.T) {
 	keeper, ctx, accounts := CreateTestEnv(t)
 
 	encoded1 := randConsensusKey(t)
-	operator1 := types3.Operator{
-		EthereumAddress:  types.EthereumAddress{0, 0, 0, 0},
-		ConsensusAddress: types.ConsensusAddress(accounts[0]),
+	operator1 := poolTypes.Operator{
+		EthereumAddress:  sharedTypes.EthereumAddress{0, 0, 0, 0},
+		ConsensusAddress: sharedTypes.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded1,
-		EthStake:         github_com_cosmos_cosmos_sdk_types.TokensFromConsensusPower(10).Uint64(),
+		EthStake:         sdkTypes.TokensFromConsensusPower(10).Uint64(),
 	}
 
-	contract := types2.EthereumBridgeContact{
-		ContractAddress: types.EthereumAddress{1, 2, 3, 4},
+	contract := bridgeTypes.EthereumBridgeContact{
+		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
 		ChainId:         2,
 	}
 
 	tests := []struct {
 		name        string
-		claim       types2.ClaimData
-		operator    types3.Operator
-		contract    types2.EthereumBridgeContact
+		claim       bridgeTypes.ClaimData
+		operator    poolTypes.Operator
+		contract    bridgeTypes.EthereumBridgeContact
 		expectedErr string
 	}{
 		{
 			name: "valid",
-			claim: types2.ClaimData{
+			claim: bridgeTypes.ClaimData{
 				TxHash:             []byte{1, 2, 3, 4},
-				ClaimType:          types2.ClaimType_Delegate,
-				EthereumAddresses:  []types.EthereumAddress{{1, 2, 3, 4}},
-				ConsensusAddresses: []types.ConsensusAddress{types.ConsensusAddress(accounts[0])},
+				ClaimType:          bridgeTypes.ClaimType_Delegate,
+				EthereumAddresses:  []sharedTypes.EthereumAddress{{1, 2, 3, 4}},
+				ConsensusAddresses: []sharedTypes.ConsensusAddress{sharedTypes.ConsensusAddress(accounts[0])},
 			},
 			operator:    operator1,
 			contract:    contract,

@@ -9,39 +9,39 @@ import (
 
 	testing2 "github.com/bloxapp/pools-network/shared/testing"
 
-	types3 "github.com/bloxapp/pools-network/x/poolsnetwork/types"
+	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkTypes "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
 
-	types2 "github.com/bloxapp/pools-network/shared/types"
+	sharedTypes "github.com/bloxapp/pools-network/shared/types"
 
-	"github.com/bloxapp/pools-network/x/bridge/types"
+	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
 
 	"github.com/bloxapp/pools-network/x/bridge/keeper"
 )
 
-func setupEnv(t *testing.T) (keeper.Keeper, sdk.Context, []sdk.AccAddress) {
+func setupEnv(t *testing.T) (keeper.Keeper, sdkTypes.Context, []sdkTypes.AccAddress) {
 	t.Helper()
 	app, ctx, accounts := testing2.SetupAppForTesting(false)
 
 	// generate pk for operator
 	pk := ed25519.GenPrivKey().PubKey()
-	encoded, err := sdk.Bech32ifyPubKey(sdk.Bech32PubKeyTypeConsPub, pk)
+	encoded, err := sdkTypes.Bech32ifyPubKey(sdkTypes.Bech32PubKeyTypeConsPub, pk)
 	require.NoError(t, err)
 
-	err = app.BridgeKeeper.PoolsKeeper.CreateOperator(ctx, types3.Operator{
-		EthereumAddress:  types2.EthereumAddress{1, 2, 3, 4},
-		ConsensusAddress: types2.ConsensusAddress(accounts[0]),
+	err = app.BridgeKeeper.PoolsKeeper.CreateOperator(ctx, poolTypes.Operator{
+		EthereumAddress:  sharedTypes.EthereumAddress{1, 2, 3, 4},
+		ConsensusAddress: sharedTypes.ConsensusAddress(accounts[0]),
 		ConsensusPk:      encoded,
 		EthStake:         10,
 		CdtBalance:       10,
 	})
 	require.NoError(t, err)
 
-	err = app.BridgeKeeper.SetEthereumBridgeContract(ctx, types.EthereumBridgeContact{
-		ContractAddress: types2.EthereumAddress{1, 2, 3, 4},
+	err = app.BridgeKeeper.SetEthereumBridgeContract(ctx, bridgeTypes.EthereumBridgeContact{
+		ContractAddress: sharedTypes.EthereumAddress{1, 2, 3, 4},
 		ChainId:         1,
 	})
 	require.NoError(t, err)
@@ -52,35 +52,35 @@ func setupEnv(t *testing.T) (keeper.Keeper, sdk.Context, []sdk.AccAddress) {
 func TestHandleMsgEthereumClaim(t *testing.T) {
 	tests := []struct {
 		name          string
-		msg           *types.MsgEthereumClaim
+		msg           *bridgeTypes.MsgEthereumClaim
 		accountIndex  uint64
 		expectedError string
 	}{
 		{
 			name:          "valid",
-			msg:           types.NewMsgEthereumClaim(1, 1, types2.EthereumAddress{1, 2, 3, 4}, nil),
+			msg:           bridgeTypes.NewMsgEthereumClaim(1, 1, sharedTypes.EthereumAddress{1, 2, 3, 4}, nil),
 			accountIndex:  0,
 			expectedError: "",
 		},
 		{
 			name:          "invalid operator",
-			msg:           types.NewMsgEthereumClaim(1, 1, types2.EthereumAddress{1, 2, 3, 4}, nil),
+			msg:           bridgeTypes.NewMsgEthereumClaim(1, 1, sharedTypes.EthereumAddress{1, 2, 3, 4}, nil),
 			accountIndex:  1,
 			expectedError: "Operator not found",
 		},
 		{
 			name:          "invalid contract address",
-			msg:           types.NewMsgEthereumClaim(1, 1, types2.EthereumAddress{1, 2, 3, 5}, nil),
+			msg:           bridgeTypes.NewMsgEthereumClaim(1, 1, sharedTypes.EthereumAddress{1, 2, 3, 5}, nil),
 			expectedError: "Ethereum bridge contract not found",
 		},
 		{
 			name:          "invalid contract chain id",
-			msg:           types.NewMsgEthereumClaim(1, 0, types2.EthereumAddress{1, 2, 3, 4}, nil),
+			msg:           bridgeTypes.NewMsgEthereumClaim(1, 0, sharedTypes.EthereumAddress{1, 2, 3, 4}, nil),
 			expectedError: "Ethereum chain id is wrong",
 		},
 		{
 			name:          "invalid nonce",
-			msg:           types.NewMsgEthereumClaim(0, 1, types2.EthereumAddress{1, 2, 3, 4}, nil),
+			msg:           bridgeTypes.NewMsgEthereumClaim(0, 1, sharedTypes.EthereumAddress{1, 2, 3, 4}, nil),
 			expectedError: "non contiguous claim nonce: Nonce invalid",
 		},
 	}
@@ -90,7 +90,7 @@ func TestHandleMsgEthereumClaim(t *testing.T) {
 			keeper, ctx, accounts := setupEnv(t)
 
 			// replace the nil consensus address
-			test.msg.ConsensusAddress = types2.ConsensusAddress(accounts[test.accountIndex])
+			test.msg.ConsensusAddress = sharedTypes.ConsensusAddress(accounts[test.accountIndex])
 
 			res, err := bridge.HandleMsgEthereumClaim(
 				ctx,

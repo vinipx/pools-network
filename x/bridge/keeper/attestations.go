@@ -4,7 +4,7 @@ import (
 	bridgeTypes "github.com/bloxapp/pools-network/x/bridge/types"
 	poolTypes "github.com/bloxapp/pools-network/x/poolsnetwork/types"
 	sdkTypes "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkErrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
@@ -30,23 +30,22 @@ func (k Keeper) ProcessAttestation(ctx sdkTypes.Context, attestation *bridgeType
 	case bridgeTypes.ClaimType_Undelegate:
 		return nil
 	case bridgeTypes.ClaimType_CreateOperator:
-		//1. Prepare operator's addresses and keys
 		operatorAddress := claim.EthereumAddresses[0]
 		consensusAddress := claim.ConsensusAddresses[0]
-		publicKey := ed25519.GenPrivKey().PubKey() //TODO: find how to get Consensus Pk from ConsensusAddress?
+		publicKey := ed25519.GenPrivKey().PubKey()
 		encoded, err := sdkTypes.Bech32ifyPubKey(sdkTypes.Bech32PubKeyTypeConsPub, publicKey)
 		if err != nil {
-			return sdkerrors.Wrap(err, "could not encode Consensus public key")
+			return sdkErrors.Wrap(err, "could not encode Consensus public key")
 		}
-		//2. Structure Operator data
+
 		operator := poolTypes.Operator{
 			EthereumAddress:  operatorAddress,
 			ConsensusAddress: consensusAddress,
 			ConsensusPk:      encoded,
 		}
-		//3. Perform CreateOperator function via Keeper
+
 		if err := k.PoolsKeeper.CreateOperator(ctx, operator); err != nil {
-			return sdkerrors.Wrap(err, "could not create operator")
+			return sdkErrors.Wrap(err, "could not create operator")
 		}
 		return nil
 	default:
@@ -63,7 +62,7 @@ func (k Keeper) AttestClaim(
 ) (*bridgeTypes.ClaimAttestation, error) {
 	att, found, err := k.GetAttestation(ctx, contract, claim)
 	if err != nil {
-		return nil, sdkerrors.Wrap(err, "could not get attestation")
+		return nil, sdkErrors.Wrap(err, "could not get attestation")
 	}
 
 	if !found {
@@ -89,7 +88,7 @@ func (k Keeper) AttestClaim(
 	}
 
 	if err := k.SaveAttestation(ctx, att); err != nil {
-		return nil, sdkerrors.Wrap(err, "could not save attestation")
+		return nil, sdkErrors.Wrap(err, "could not save attestation")
 	}
 	return att, nil
 }
@@ -101,7 +100,7 @@ func (k Keeper) SaveAttestation(
 ) error {
 	byts, err := claimAttestation.Marshal()
 	if err != nil {
-		return sdkerrors.Wrap(err, "Could not marshal claim attestation")
+		return sdkErrors.Wrap(err, "Could not marshal claim attestation")
 	}
 
 	store := ctx.KVStore(k.storeKey)
